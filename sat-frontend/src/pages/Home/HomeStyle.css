@@ -1,7 +1,7 @@
 .home-container {
-  display: flex; /* Set container to flexbox */
-  flex-direction: column; /* Arrange children vertically */
-  justify-content: center; /* Center children vertically */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 h1 {

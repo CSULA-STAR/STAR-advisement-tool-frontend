@@ -1,9 +1,29 @@
 .container {
-  /* display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between; */
-  /* overflow-y: auto;
-  height: calc(100vh - var(--header-height));
-  scrollbar-width: none; */
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.cardContainer {
+  width: 100%;
+}
+
+@media print {
+  header,
+  footer,
+  .sidebar {
+    display: none !important;
+  }
+
+  .main-content {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
 }

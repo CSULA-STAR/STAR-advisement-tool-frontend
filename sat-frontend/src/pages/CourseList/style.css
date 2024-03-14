@@ -4,7 +4,6 @@
   align-items: center;
   justify-content: space-between;
   overflow-y: auto;
-  height: calc(100vh - var(--header-height));
   scrollbar-width: none;
 }
 .main-content::-webkit-scrollbar {
@@ -12,8 +11,9 @@
 }
 
 .college-column {
-  width: 48%;
-  padding: 10px;
+  /* width: 48%; */
+  /* padding: 10px; */
+  align-items: center;
 }
 
 .college-column h2 {
@@ -54,11 +54,11 @@
 }
 
 .college-column {
-  width: 45%; /* Adjust width as needed */
+  width: 45%;
 }
 
 @media (max-width: 768px) {
   .college-column {
-    width: 100%; /* Take full width on smaller screens */
+    width: 100%;
   }
 }

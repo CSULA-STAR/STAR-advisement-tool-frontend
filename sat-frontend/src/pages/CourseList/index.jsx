@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react";
+import ForwardRoundedIcon from "@mui/icons-material/ForwardRounded";
 import axios from "axios";
-import CourseCard from "../../components/CourseCard";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import CourseCard from "../../components/CourseCard";
 import "./style.css";
 
 const CourseList = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { program, sId } = location.state || {};
-  console.log("location", location.state);
+  const { program, sId, term, startYear } = location.state || {};
   const [matchedCourses, setMatchedCourses] = useState([]);
   const [csulaCourseList, setCsulaCourseList] = useState([]);
   const [remainingCsulaCourses, setRemainingCsulaCourses] = useState([]);
@@ -54,7 +54,7 @@ const CourseList = () => {
     const remainingCsula = [];
     csulaCourses.forEach((csulaCourse) => {
       const match = selectedSchoolCourses.find((selectedCourse) =>
-        intersectArrays(csulaCourse.subject_code, selectedCourse.equivalent_to)
+        intersectArrays(csulaCourse.course_code, selectedCourse.equivalent_to)
       );
       if (match) {
         matched.push({ csulaCourse, selectedCourse: match });
@@ -71,19 +71,13 @@ const CourseList = () => {
   };
 
   const goToSelectedCoursesPage = () => {
-    const selectedCourses = [];
-    const filteredOutCourses = [];
+    const selectedCoursesWithFlag = csulaCourseList.map((course) => ({
+      ...course,
+      completed: checkboxResponses[course._id] ? true : false,
+    }));
 
-    csulaCourseList.forEach((course) => {
-      if (checkboxResponses[course._id]) {
-        selectedCourses.push(course);
-      } else {
-        filteredOutCourses.push(course);
-      }
-    });
-
-    navigate("/selected-courses", {
-      state: { selectedCourses, filteredOutCourses },
+    navigate("/course-selection", {
+      state: { term, courseList: selectedCoursesWithFlag, startYear },
     });
   };
 
@@ -91,8 +85,8 @@ const CourseList = () => {
     return <div>Error: Missing program or sId props</div>;
   }
 
+  console.log("csulaCourseList", csulaCourseList);
   console.log("matchedCourses", matchedCourses);
-  console.log("remainingCsulaCourses", remainingCsulaCourses);
 
   let selectedSchoolHeadingRendered = false;
   let csulaHeadingRendered = false;
@@ -104,21 +98,30 @@ const CourseList = () => {
           <div className="college-column">
             {!selectedSchoolHeadingRendered && <h2>Selected School Courses</h2>}
             <CourseCard
-              enableCheckbox={false}
+              enableCheckbox={true}
+              hoverable={false}
               course={selectedCourse}
-              onCheckboxChange={handleCheckboxChange}
               isChecked={checkboxResponses[csulaCourse._id]}
+              onCheckboxChange={(isChecked) =>
+                handleCheckboxChange(csulaCourse._id, isChecked)
+              }
             />
             {(selectedSchoolHeadingRendered = true)}
           </div>
+          <div className="arrow-column">
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                height: "100%",
+              }}
+            >
+              <ForwardRoundedIcon style={{ fontSize: 40 }} />
+            </div>
+          </div>
           <div className="college-column">
             {!csulaHeadingRendered && <h2>Cal State LA Courses</h2>}
-            <CourseCard
-              enableCheckbox={true}
-              course={csulaCourse}
-              onCheckboxChange={handleCheckboxChange}
-              isChecked={checkboxResponses[csulaCourse._id]}
-            />
+            <CourseCard enableCheckbox={false} course={csulaCourse} />
             {(csulaHeadingRendered = true)}
           </div>
         </div>
@@ -126,12 +129,23 @@ const CourseList = () => {
       {remainingCsulaCourses.map((course) => (
         <div className="course-row" key={course.id}>
           <div className="college-column"></div>
+          <div className="arrow-column">
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                height: "100%",
+                transform: "rotate(180deg)",
+              }}
+            >
+              {/* <ForwardRoundedIcon style={{ fontSize: 40 }} /> */}
+            </div>
+          </div>
           <div className="college-column">
             <CourseCard
               key={course.id}
+              enableCheckbox={false}
               course={course}
-              onCheckboxChange={handleCheckboxChange}
-              isChecked={checkboxResponses[course.id]}
             />
           </div>
         </div>

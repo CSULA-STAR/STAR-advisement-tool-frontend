@@ -1,9 +1,10 @@
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "./App.css";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import Home from "./pages/Home";
+import Navbar from "./components/Navbar/Navbar";
 import CourseList from "./pages/CourseList";
+import Home from "./pages/Home/Home";
 import SelectedCourses from "./pages/SelectedCourses";
+import { CourseSelection } from "./pages/CourseSelection/CourseSelection";
 
 const App = () => {
   return (
@@ -14,6 +15,7 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/courselist" element={<CourseList />} />
           <Route path="/selected-courses" element={<SelectedCourses />} />
+          <Route path="/course-selection" element={<CourseSelection />} />
         </Routes>
       </main>
     </Router>

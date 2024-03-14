@@ -1,10 +1,11 @@
 .header {
   position: fixed;
-  width: 100%;
   top: 0;
   left: 0;
-  background-color: transparent;
-  z-index: var(--z-fixed);
+  width: 100%;
+  z-index: 1000;
+  background-color: black;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .nav {
@@ -12,15 +13,14 @@
   align-items: center;
   justify-content: space-between;
   position: relative;
-  height: var(--header-height);
+  padding: 5px;
   margin: 1rem;
 }
 
 .nav__logo {
-  color: var(--first-color);
+  color: white;
   transition: color 0.4s;
   font-size: var(--h2-font-size);
-  /* font-family: var(--second-font); */
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -29,19 +29,20 @@
 .nav__toggle,
 .nav__close {
   font-size: 1.5rem;
-  color: var(--title-color);
+  color: white;
   cursor: pointer;
 }
 
 .nav__cta {
-  background-color: var(--first-color);
-  color: var(--title-color);
+  background-color: #ffce00;
+  color: #000;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s ease;
   padding: 0.75rem 1.5rem;
 }
+
 .nav__list {
   display: flex;
   flex-direction: row;
@@ -49,7 +50,7 @@
 }
 
 .nav__link {
-  color: var(--title-color);
+  color: white;
   font-weight: var(--font-semi-bold);
   transition: color 0.4s;
 }

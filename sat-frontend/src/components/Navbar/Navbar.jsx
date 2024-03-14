@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import "./style.css";
+import "./NavbarStyle.css";
 
 const Navbar = () => {
   return (
@@ -31,10 +31,9 @@ const Navbar = () => {
           <div className="nav__close" id="nav-close">
             {/* <IoClose /> */}
           </div>
-        </div>
-
-        <div className="nav__toggle" id="nav-toggle">
-          {/* <IoMenu /> */}
+          <div className="nav__toggle" id="nav-toggle">
+            {/* <IoMenu /> */}
+          </div>
         </div>
       </nav>
     </header>

@@ -1,9 +1,9 @@
 .main-content {
-  display: flex;
+  margin-top: 84px;
+  /* display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 100px;
-  height: calc(100vh - var(--header-height));
+  padding: 100px 100px 50px 100px; */
 }
 
 /* #root {

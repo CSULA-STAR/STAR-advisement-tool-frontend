@@ -8,18 +8,14 @@ import Select from "@mui/material/Select";
 
 export default function SelectionDropdown({ label, options, value, onChange }) {
   return (
-    <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-      <InputLabel id="demo-select-small-label">{label}</InputLabel>
+    <FormControl sx={{ m: 1 }} size="small">
+      <InputLabel>{label}</InputLabel>
       <Select
-        labelId="demo-select-small-label"
-        id="demo-select-small"
+        sx={{ width: 300, textAlign: "left" }}
         value={value}
         label={label}
         onChange={onChange}
       >
-        <MenuItem value="">
-          <em>None</em>
-        </MenuItem>
         {options.map((option) => (
           <MenuItem key={option.value} value={option.value}>
             {option.label}
