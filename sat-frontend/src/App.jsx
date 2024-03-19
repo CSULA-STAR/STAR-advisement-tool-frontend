@@ -1,7 +1,7 @@
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import "./App.css";
 import Navbar from "./components/Navbar/Navbar";
-import CourseList from "./pages/CourseList";
+import CourseList from "./pages/CourseList/CourseList";
 import Home from "./pages/Home/Home";
 import SelectedCourses from "./pages/SelectedCourses";
 import { CourseSelection } from "./pages/CourseSelection/CourseSelection";

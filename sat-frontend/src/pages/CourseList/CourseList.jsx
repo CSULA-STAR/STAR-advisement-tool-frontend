@@ -3,7 +3,8 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import CourseCard from "../../components/CourseCard";
-import "./style.css";
+import "./CourseListStyle.css";
+import { Button } from "@material-ui/core";
 
 const CourseList = () => {
   const navigate = useNavigate();
@@ -156,13 +157,18 @@ const CourseList = () => {
           <div className="college-column">
             <CourseCard
               key={course.id}
+              hoverable={true}
               enableCheckbox={false}
               course={course}
             />
           </div>
         </div>
       ))}
-      <button onClick={goToSelectedCoursesPage}>View Selected Courses</button>
+      <div className="floating-button">
+        <Button variant="contained" onClick={goToSelectedCoursesPage}>
+          View Selected Courses
+        </Button>
+      </div>
     </div>
   );
 };

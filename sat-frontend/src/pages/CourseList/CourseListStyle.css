@@ -56,6 +56,11 @@
 .college-column {
   width: 45%;
 }
+.floating-button {
+  position: fixed;
+  bottom: 20px;
+  margin: auto;
+}
 
 @media (max-width: 768px) {
   .college-column {
