@@ -10,8 +10,8 @@ export const CourseSelection = () => {
   const navigate = useNavigate();
   const [navigationCount, setNavigationCount] = useState(0);
   const location = useLocation();
-  const { courseList, term, startYear } = location.state || {};
-
+  const { courseList, term } = location.state || {};
+  let startYear = location.state.startYear;
   const handleCheckboxChange = (courseId, isChecked) => {
     setCheckboxResponses({ ...checkboxResponses, [courseId]: isChecked });
   };
@@ -23,14 +23,29 @@ export const CourseSelection = () => {
   }, [courseList, term]);
 
   const handleNextClick = () => {
-    const checkedCourses = courseList.filter(
+    let checkedCourses = courseList.filter(
       (course) => checkboxResponses[course._id]
     );
-    localStorage.setItem("selectedCourses", JSON.stringify(checkedCourses));
+    let existingCourses = localStorage.getItem("selectedCourses");
+    existingCourses = existingCourses ? JSON.parse(existingCourses) : [];
+
+    checkedCourses = checkedCourses.map(course => ({
+      ...course,
+      selected_term: term,
+      startYear: startYear
+    }));
+    
+    let newCourses = [...existingCourses, ...checkedCourses]; 
+
+    localStorage.setItem("selectedCourses", JSON.stringify(newCourses));
+    
+    console.log(localStorage.getItem("selectedCourses"));
     const filteredCourseList = courseList.filter(
       (course) => !checkboxResponses[course._id]
     );
     if (navigationCount < 5) {
+      startYear = navigationCount === 2 ? startYear+1 : startYear ;
+      console.log("startyeaInselection" + startYear);
       navigate("/course-selection", {
         state: {
           courseList: filteredCourseList,
@@ -58,7 +73,7 @@ export const CourseSelection = () => {
         padding={3}
       >
         <Typography variant="h4" component="div">
-          {getTermLabel(term)}
+          {getTermLabel(term)} {startYear}
         </Typography>
         <Box>
           <Button>Skip</Button>

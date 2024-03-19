@@ -8,7 +8,15 @@ import "./style.css";
 const CourseList = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { program, sId, term, startYear } = location.state || {};
+  const { program, sId, term } = location.state ;
+  const startYear = location.state.startyear;
+  useEffect(() => {
+    if (location.state) {
+      console.log("CourseListYear:", startYear);
+    } else {
+      console.log("Location state is not available.");
+    }
+  }, [location.state]);
   const [matchedCourses, setMatchedCourses] = useState([]);
   const [csulaCourseList, setCsulaCourseList] = useState([]);
   const [remainingCsulaCourses, setRemainingCsulaCourses] = useState([]);

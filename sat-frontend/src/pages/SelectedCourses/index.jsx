@@ -5,44 +5,24 @@ import "./style.css";
 import IconButton from "@mui/material/IconButton";
 import PrintIcon from "@mui/icons-material/Print";
 import { extractCourseNumbers } from "../../utils";
+import { Typography } from "@mui/material";
+
+
 const SelectedCoursesPage = () => {
   const location = useLocation();
   const { courseList, startYear } = location.state || {};
   const [SelectedCourses, setSelectedCourses] = useState([]);
 
-  // const selectedCoursesWithFlag = selectedCourses.map((course) => ({
-  //   ...course,
-  //   completed: true,
-  // }));
-
-  // const filteredOutCoursesWithFlag = filteredOutCourses.map((course) => ({
-  //   ...course,
-  //   completed: false,
-  // }));
-
-  // const courseList = selectedCoursesWithFlag.concat(filteredOutCoursesWithFlag);
-
   useEffect(() => {
     setSelectedCourses(JSON.parse(localStorage.getItem("selectedCourses")));
   }, []);
 
-  const firstYearCourses = SelectedCourses.filter(
-    (course) => Math.min(...extractCourseNumbers(course.subject_code)) < 2000
-  );
+  const coursesByYearAndTerm = (yearOffset, term) => {
+    return SelectedCourses.filter((course) => {
+      return course.selected_term.toLowerCase() === term.toLowerCase() && course.startYear === startYear + yearOffset;
+    });
+  };
 
-  const secondYearCourses = SelectedCourses.filter((course) => {
-    const minCourseNumber = Math.min(
-      ...extractCourseNumbers(course.subject_code)
-    );
-    const maxCourseNumber = Math.max(
-      ...extractCourseNumbers(course.subject_code)
-    );
-    return minCourseNumber >= 2000 && maxCourseNumber < 3000;
-  });
-
-  const thirdYearCourses = SelectedCourses.filter(
-    (course) => Math.min(...extractCourseNumbers(course.subject_code)) >= 3000
-  );
   const handleCommentClick = (course) => {
     console.log("Adding comment for course:", course);
   };
@@ -53,62 +33,128 @@ const SelectedCoursesPage = () => {
 
   return (
     <>
-      <div
-        style={{
-          display: "flex",
-          width: "100%",
-          justifyContent: "end",
-          marginBottom: "10px",
-        }}
-      >
+    
+<div className="printTable" style={{ display: "none" }}>
+  <table>
+    <thead>
+      <tr>
+        <th>Year</th>
+        <th>Spring</th>
+        <th>Summer</th>
+        <th>Fall</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{startYear - 1}</td>
+        <td> 
+        {coursesByYearAndTerm(-1, 'Spring').map((course, index) => (
+           <div key={index} className="courseDetails">
+            <h5>{course.course_code}</h5>
+            {course.course_name} <br />
+            Pre-requisite : {course.pre_requisite?.course_code.map(id => id).join(", ")}
+          </div>
+        ))}
+        </td>
+        <td>
+        {coursesByYearAndTerm(-1, 'Summer').map((course, index) => (
+           <div key={index} className="courseDetails">
+            <h5>{course.course_code}</h5>
+            {course.course_name} <br />
+            Pre-requisite : {course.pre_requisite?.course_code.map(id => id).join(", ")}
+         </div>
+        ))}
+        </td>
+        <td>
+        {coursesByYearAndTerm(-1, 'Fall').map((course, index) => (
+          <div key={index} className="courseDetails">
+            <h5>{course.course_code}</h5>
+            {course.course_name} <br />
+            Pre-requisite : {course.pre_requisite?.course_code.map(id => id).join(", ")}
+          </div>
+        ))}
+        </td>
+      </tr>
+      <tr>
+        <td>{startYear}</td>
+        <td>
+        {coursesByYearAndTerm(0, 'Spring').map((course, index) => (
+        <div key={index} className="courseDetails">
+            <h5>{course.course_code}</h5>
+            {course.course_name} <br />
+            Pre-requisite : {course.pre_requisite?.course_code.map(id => id).join(", ")}
+        </div>
+        ))}
+        </td>
+        <td>
+        {coursesByYearAndTerm(0, 'Summer').map((course, index) => (
+           <div key={index} className="courseDetails">
+            <h5>{course.course_code}</h5>
+            {course.course_name} <br />
+            Pre-requisite : {course.pre_requisite?.course_code.map(id => id).join(", ")}
+         </div>
+        ))}
+        </td>
+        <td>
+        {coursesByYearAndTerm(0, 'Fall').map((course, index) => (
+           <div key={index} className="courseDetails">
+            <h5>{course.course_code}</h5>
+            {course.course_name} <br />
+            Pre-requisite : {course.pre_requisite?.course_code.map(id => id).join(", ")}
+         </div>
+        ))}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+      <div style={{ display: "flex", width: "100%", justifyContent: "end", marginBottom: "10px" }}>
         <IconButton onClick={handlePrintScreen}>
           <PrintIcon />
         </IconButton>
       </div>
       <div className="container">
-        {/* First Year Courses */}
-        <div className="row">
-          <h2>First Year</h2>
-          {firstYearCourses.map((course) => (
-            <div key={course._id} className="cardContainer">
-              <CourseCard
-                course={course}
-                enableCheckbox={false}
-                onCommentClick={handleCommentClick}
-                addCommment={true}
-              />
-            </div>
-          ))}
-        </div>
+        <div className="yearsContainer">
+          {/* First Year Column */}
+          <div className="yearColumn">
+            <Typography variant="h4">First Year ({startYear - 1})</Typography>
+            {['Spring', 'Summer', 'Fall'].map((term) => (
+              <div key={term} className="termSection">
+                <h3>{term}</h3>
+                {coursesByYearAndTerm(-1, term).map((course) => (
+                  <div key={course._id} className="cardContainer">
+                    <CourseCard
+                      course={course}
+                      enableCheckbox={false}
+                      onCommentClick={handleCommentClick}
+                      addComment={true}
+                    />
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
 
-        {/* Second Year Courses */}
-        <div className="row">
-          <h2>Second Year</h2>
-          {secondYearCourses.map((course) => (
-            <div key={course._id} className="cardContainer">
-              <CourseCard
-                course={course}
-                enableCheckbox={false}
-                onCommentClick={handleCommentClick}
-                addCommment={true}
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Third Year Courses */}
-        <div className="row">
-          <h2>Third Year</h2>
-          {thirdYearCourses.map((course) => (
-            <div key={course._id} className="cardContainer">
-              <CourseCard
-                course={course}
-                enableCheckbox={false}
-                onCommentClick={handleCommentClick}
-                addCommment={true}
-              />
-            </div>
-          ))}
+          {/* Second Year Column */}
+          <div className="yearColumn">
+            <Typography variant="h4">Second Year ({startYear})</Typography>
+            {['Spring', 'Summer', 'Fall'].map((term) => (
+              <div key={term} className="termSection">
+                <h3>{term}</h3>
+                {coursesByYearAndTerm(0, term).map((course) => (
+                  <div key={course._id} className="cardContainer">
+                    <CourseCard
+                      course={course}
+                      enableCheckbox={false}
+                      onCommentClick={handleCommentClick}
+                      addComment={true}
+                    />
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </>
