@@ -89,6 +89,7 @@ export const CourseSelection = () => {
               <CourseCard
                 enableCheckbox
                 course={course}
+                addComment={true}
                 onCheckboxChange={(isChecked) =>
                   handleCheckboxChange(course._id, isChecked)
                 }

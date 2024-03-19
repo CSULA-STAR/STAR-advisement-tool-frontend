@@ -8,9 +8,11 @@ import {
   Stack,
   Typography,
   Tooltip,
+  Link,
 } from "@mui/material";
 import PropTypes from "prop-types";
 import { useState } from "react";
+import CustomModal from "../Modal";
 import "./style.css";
 
 const CourseCard = ({
@@ -19,7 +21,7 @@ const CourseCard = ({
   onCheckboxChange,
   isChecked,
   onCommentClick,
-  addCommment,
+  addComment,
   hoverable,
 }) => {
   const {
@@ -104,19 +106,41 @@ const CourseCard = ({
           </Typography>
         </Stack>
         {!isHovered ? <Divider style={{ marginBottom: "10px" }} /> : null}
-        <Tooltip title={course_name}>
-          <Typography
-            color="text.secondary"
-            variant="body2"
-            style={{
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {course_name}
-          </Typography>
-        </Tooltip>
+        <Stack>
+          <Tooltip title={course_name}>
+            <Typography
+              color="text.secondary"
+              variant="body2"
+              style={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {course_name}
+            </Typography>
+          </Tooltip>
+          <Box style={{ display: "flex", justifyContent: "end" }}>
+            {addComment ? (
+              // Use Link component instead of Button
+              <Link
+                onClick={handleModalOpen}
+                style={{
+                  textDecoration: "none",
+                  marginTop: "10px",
+                  cursor: "pointer",
+                }}
+              >
+                Add Comment
+              </Link>
+            ) : null}
+          </Box>
+        </Stack>
+        <CustomModal
+          openModal={openModal}
+          handleModalClose={handleModalClose}
+          handleCommentClick={handleCommentClick}
+        />
       </Box>
       {isHovered ? (
         <>
@@ -189,7 +213,7 @@ CourseCard.propTypes = {
   onCheckboxChange: PropTypes.func,
   isChecked: PropTypes.bool.isRequired,
   onCommentClick: PropTypes.func.isRequired,
-  addCommment: PropTypes.bool,
+  addComment: PropTypes.bool,
   hoverable: PropTypes.bool,
 };
 
