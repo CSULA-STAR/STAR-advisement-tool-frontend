@@ -29,22 +29,22 @@ export const CourseSelection = () => {
     let existingCourses = localStorage.getItem("selectedCourses");
     existingCourses = existingCourses ? JSON.parse(existingCourses) : [];
 
-    checkedCourses = checkedCourses.map(course => ({
+    checkedCourses = checkedCourses.map((course) => ({
       ...course,
       selected_term: term,
-      startYear: startYear
+      startYear: startYear,
     }));
-    
-    let newCourses = [...existingCourses, ...checkedCourses]; 
+
+    let newCourses = [...existingCourses, ...checkedCourses];
 
     localStorage.setItem("selectedCourses", JSON.stringify(newCourses));
-    
+
     console.log(localStorage.getItem("selectedCourses"));
     const filteredCourseList = courseList.filter(
       (course) => !checkboxResponses[course._id]
     );
     if (navigationCount < 5) {
-      startYear = navigationCount === 2 ? startYear+1 : startYear ;
+      startYear = navigationCount === 2 ? startYear + 1 : startYear;
       console.log("startyeaInselection" + startYear);
       navigate("/course-selection", {
         state: {
@@ -76,7 +76,7 @@ export const CourseSelection = () => {
           {getTermLabel(term)} {startYear}
         </Typography>
         <Box>
-          <Button>Skip</Button>
+          {/* <Button>Skip</Button> */}
           <Button variant="contained" onClick={handleNextClick}>
             Next
           </Button>

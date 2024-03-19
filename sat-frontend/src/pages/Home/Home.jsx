@@ -36,7 +36,7 @@ const Home = () => {
   };
 
   const handleStartYearChange = (year) => {
-    setStartYear(year);
+    setStartYear(year.target.value);
   };
 
   const handleSubmit = () => {

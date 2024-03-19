@@ -8,7 +8,7 @@ import "./style.css";
 const CourseList = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { program, sId, term } = location.state ;
+  const { program, sId, term } = location.state;
   const startYear = location.state.startyear;
   useEffect(() => {
     if (location.state) {
@@ -129,7 +129,11 @@ const CourseList = () => {
           </div>
           <div className="college-column">
             {!csulaHeadingRendered && <h2>Cal State LA Courses</h2>}
-            <CourseCard enableCheckbox={false} course={csulaCourse} />
+            <CourseCard
+              hoverable={true}
+              enableCheckbox={false}
+              course={csulaCourse}
+            />
             {(csulaHeadingRendered = true)}
           </div>
         </div>

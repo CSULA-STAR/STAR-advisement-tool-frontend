@@ -63,8 +63,8 @@ const CourseCard = ({
   return (
     <Card
       // variant="outlined"
-      onMouseEnter={!hoverable ? handleMouseEnter : {}}
-      onMouseLeave={!hoverable ? handleMouseLeave : {}}
+      onMouseEnter={hoverable ? handleMouseEnter : {}}
+      onMouseLeave={hoverable ? handleMouseLeave : {}}
       // onClick={!hoverable ? handleMouseEnter : {}}
       sx={{ maxWidth: 360 }}
       style={{ marginBottom: "10px", backgroundColor: "#e3e2e7" }}
@@ -91,8 +91,11 @@ const CourseCard = ({
               </Typography>
             )}
             {course_code?.map((code, index) => (
-              <Typography gutterBottom variant="h5" key={index} component="div">
-                <strong>{code}</strong>
+              <Typography gutterBottom variant="h6" key={index} component="div">
+                <strong>
+                  {code}
+                  {index < course_code.length - 1 ? "/ " : ""}
+                </strong>
               </Typography>
             ))}
           </Stack>
@@ -101,9 +104,19 @@ const CourseCard = ({
           </Typography>
         </Stack>
         {!isHovered ? <Divider style={{ marginBottom: "10px" }} /> : null}
-        <Typography color="text.secondary" variant="body2">
-          {course_name}
-        </Typography>
+        <Tooltip title={course_name}>
+          <Typography
+            color="text.secondary"
+            variant="body2"
+            style={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {course_name}
+          </Typography>
+        </Tooltip>
       </Box>
       {isHovered ? (
         <>
