@@ -9,7 +9,9 @@ import { Button } from "@material-ui/core";
 const CourseList = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { program, sId, term } = location.state;
+  const { program, college, term } = location.state;
+
+  console.log("Location", program, college, term);
   const startYear = location.state.startyear;
   useEffect(() => {
     if (location.state) {
@@ -24,7 +26,7 @@ const CourseList = () => {
   const [checkboxResponses, setCheckboxResponses] = useState({});
 
   useEffect(() => {
-    if (program && sId) {
+    if (program && college) {
       const fetchCourses = async () => {
         try {
           const csulaResponse = await axios.get(
@@ -33,7 +35,7 @@ const CourseList = () => {
           console.log("-->21", csulaResponse.data);
           setCsulaCourseList(csulaResponse.data);
           const selectedSchoolResponse = await axios.get(
-            `http://localhost:3001/fetch-courses?sid=${sId}`
+            `http://localhost:3001/fetch-courses?sid=${college.id}`
           );
           console.log("-->27", selectedSchoolResponse.data);
 
@@ -56,7 +58,7 @@ const CourseList = () => {
 
       fetchCourses();
     }
-  }, [program, sId]);
+  }, [program, college]);
 
   const findMatchingCourses = (csulaCourses, selectedSchoolCourses) => {
     const matched = [];
@@ -90,8 +92,8 @@ const CourseList = () => {
     });
   };
 
-  if (!program || !sId) {
-    return <div>Error: Missing program or sId props</div>;
+  if (!program || !college) {
+    return <div>Error: Missing program or college props</div>;
   }
 
   console.log("csulaCourseList", csulaCourseList);
@@ -105,7 +107,7 @@ const CourseList = () => {
       {matchedCourses.map(({ csulaCourse, selectedCourse }) => (
         <div className="course-row" key={csulaCourse._id}>
           <div className="college-column">
-            {!selectedSchoolHeadingRendered && <h2>Selected School Courses</h2>}
+            {!selectedSchoolHeadingRendered && <h2>{college?.name}</h2>}
             <CourseCard
               enableCheckbox={true}
               hoverable={false}

@@ -7,6 +7,7 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 
 export default function SelectionDropdown({ label, options, value, onChange }) {
+  console.log("valueee", value);
   return (
     <FormControl sx={{ m: 1 }} size="small">
       <InputLabel>{label}</InputLabel>
@@ -14,7 +15,12 @@ export default function SelectionDropdown({ label, options, value, onChange }) {
         sx={{ width: 300, textAlign: "left" }}
         value={value}
         label={label}
-        onChange={onChange}
+        onChange={(event) => {
+          const selectedOption = options.find(
+            (option) => option.value === event.target.value
+          );
+          onChange(selectedOption);
+        }}
       >
         {options.map((option) => (
           <MenuItem key={option.value} value={option.value}>

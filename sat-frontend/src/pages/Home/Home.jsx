@@ -17,26 +17,24 @@ const Home = () => {
   const [selectedProgram, setSelectedProgram] = useState();
   const [selectedTerm, setSelectedTerm] = useState();
 
-  const [isSubmitDisabled, setIsSubmitDisabled] = useState(true);
   const navigate = useNavigate();
 
   const handleChange = (event) => {
-    setCollege(event.target.value);
+    setCollege(event.value);
     setSelectedProgram("");
-    setIsSubmitDisabled(true);
   };
 
   const handleProgramChange = (selectedProgram) => {
-    setSelectedProgram(selectedProgram.target.value);
+    console.log("selectedProgram", selectedProgram);
+    setSelectedProgram(selectedProgram.value);
   };
 
   const handleTermChange = (term) => {
-    setSelectedTerm(term.target.value);
-    setIsSubmitDisabled(!selectedProgram);
+    setSelectedTerm(term);
   };
 
   const handleStartYearChange = (year) => {
-    setStartYear(year.target.value);
+    setStartYear(year);
   };
 
   const handleSubmit = () => {
@@ -45,16 +43,22 @@ const Home = () => {
       return;
     }
 
+    console.log(
+      "selectedProgrammmmmm",
+      selectedProgram,
+      college,
+      selectedTerm,
+      startYear
+    );
     navigate("/courselist", {
       state: {
         program: selectedProgram,
-        sId: college,
+        college: college,
         term: selectedTerm,
         startyear: startYear,
       },
     });
   };
-  console.log("TERMS", TERMS, programs);
 
   useEffect(() => {
     localStorage.removeItem("selectedCourses");
@@ -68,7 +72,7 @@ const Home = () => {
         setSchools(
           response.data.map((college) => ({
             label: college.name,
-            value: college.id,
+            value: college,
           }))
         );
       } catch (error) {
@@ -81,10 +85,12 @@ const Home = () => {
 
   useEffect(() => {
     const fetchPrograms = async () => {
+      console.log("COLLEGE", college);
+
       if (college) {
         try {
           const response = await axios.get(
-            `http://localhost:3001/fetch-programs?collegeId=${college}`
+            `http://localhost:3001/fetch-programs?collegeId=${college.id}`
           );
           setPrograms(
             response.data.map((program) => ({
@@ -112,14 +118,14 @@ const Home = () => {
         <SelectionDropdown
           label="Select College"
           options={schools}
-          value={college}
+          value={college.value}
           onChange={handleChange}
         />
         {college && (
           <SelectionDropdown
             label="Select Program"
             options={programs}
-            value={selectedProgram}
+            value={selectedProgram.value}
             onChange={handleProgramChange}
           />
         )}
@@ -135,7 +141,7 @@ const Home = () => {
           <SelectionDropdown
             label="Start Year"
             options={getNextYears(3)}
-            value={startYear}
+            value={startYear.value}
             onChange={handleStartYearChange}
           />
         )}
