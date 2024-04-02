@@ -3,15 +3,18 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import CourseCard from "../../components/CourseCard";
 import { getNextTerm, getTermLabel } from "../../utils";
+import CourseSelectorModal from "../../components/CourseSelectorModal/CourseSelectorModal";
 
 export const CourseSelection = () => {
   const [data, setData] = useState([]);
+  const [openCourseModal, setOpenCourseModal] = useState(false);
+
   const [checkboxResponses, setCheckboxResponses] = useState({});
   const navigate = useNavigate();
   const [navigationCount, setNavigationCount] = useState(0);
   const location = useLocation();
   const { courseList, term } = location.state || {};
-  let startYear = location.state.startYear;
+  let startYear = location.state?.startYear;
   const handleCheckboxChange = (courseId, isChecked) => {
     setCheckboxResponses({ ...checkboxResponses, [courseId]: isChecked });
   };
@@ -39,13 +42,12 @@ export const CourseSelection = () => {
 
     localStorage.setItem("selectedCourses", JSON.stringify(newCourses));
 
-    console.log(localStorage.getItem("selectedCourses"));
+    console.log("localStrorage..", localStorage.getItem("selectedCourses"));
     const filteredCourseList = courseList.filter(
       (course) => !checkboxResponses[course._id]
     );
     if (navigationCount < 5) {
       startYear = navigationCount === 2 ? startYear + 1 : startYear;
-      console.log("startyeaInselection" + startYear);
       navigate("/course-selection", {
         state: {
           courseList: filteredCourseList,
@@ -63,42 +65,58 @@ export const CourseSelection = () => {
       });
     }
   };
+  const handleCourseCardClick = () => {
+    setOpenCourseModal(true);
+  };
+
+  const handleModalClose = () => {
+    setOpenCourseModal(false);
+  };
 
   return (
-    <Box sx={{ textAlign: "center" }}>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        padding={3}
-      >
-        <Typography variant="h4" component="div">
-          {getTermLabel(term)} {startYear}
-        </Typography>
-        <Box>
-          {/* <Button>Skip</Button> */}
-          <Button variant="contained" onClick={handleNextClick}>
-            Next
-          </Button>
+    <>
+      <Box sx={{ textAlign: "center" }}>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          padding={3}
+        >
+          <Typography variant="h4" component="div">
+            {getTermLabel(term)} {startYear}
+          </Typography>
+          <Box>
+            {/* <Button>Skip</Button> */}
+            <Button variant="contained" onClick={handleNextClick}>
+              Next
+            </Button>
+          </Box>
+        </Stack>
+        <Box sx={{ padding: 3 }}>
+          <Grid container spacing={2}>
+            {data.map((course) => (
+              <Grid item key={course._id} xs={12} sm={6} md={4} lg={3}>
+                <CourseCard
+                  onClick={handleCourseCardClick}
+                  enableCheckbox
+                  hoverable={true}
+                  course={course}
+                  addComment={true}
+                  onCheckboxChange={(isChecked) =>
+                    handleCheckboxChange(course._id, isChecked)
+                  }
+                />
+              </Grid>
+            ))}
+          </Grid>
         </Box>
-      </Stack>
-      <Box sx={{ padding: 3 }}>
-        <Grid container spacing={2}>
-          {data.map((course) => (
-            <Grid item key={course._id} xs={12} sm={6} md={4} lg={3}>
-              <CourseCard
-                enableCheckbox
-                hoverable={true}
-                course={course}
-                addComment={true}
-                onCheckboxChange={(isChecked) =>
-                  handleCheckboxChange(course._id, isChecked)
-                }
-              />
-            </Grid>
-          ))}
-        </Grid>
       </Box>
-    </Box>
+      <CourseSelectorModal
+        openModal={openCourseModal}
+        handleModalClose={handleModalClose}
+        // courses={}
+        // handleSubmit={}
+      />
+    </>
   );
 };

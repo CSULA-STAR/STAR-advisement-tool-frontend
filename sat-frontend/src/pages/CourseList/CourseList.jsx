@@ -32,15 +32,19 @@ const CourseList = () => {
           const csulaResponse = await axios.get(
             `http://localhost:3001/fetch-csula-courses?dept=${program.department}`
           );
-          console.log("-->21", csulaResponse.data);
-          setCsulaCourseList(csulaResponse.data);
+          console.log("csulaResponse", csulaResponse.data);
+          let filteredCourses = csulaResponse.data.filter(
+            (course) => course.block_type
+          );
+          console.log("-->filteredCourses", filteredCourses);
+          setCsulaCourseList(filteredCourses);
           const selectedSchoolResponse = await axios.get(
             `http://localhost:3001/fetch-courses?sid=${college.id}`
           );
           console.log("-->27", selectedSchoolResponse.data);
 
           const { matched, remainingCsula } = findMatchingCourses(
-            csulaResponse.data,
+            filteredCourses,
             selectedSchoolResponse.data
           );
           setMatchedCourses(matched);
@@ -88,7 +92,11 @@ const CourseList = () => {
     }));
 
     navigate("/course-selection", {
-      state: { term, courseList: selectedCoursesWithFlag, startYear },
+      state: {
+        term: term.value,
+        courseList: selectedCoursesWithFlag,
+        startYear: startYear.value,
+      },
     });
   };
 

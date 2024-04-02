@@ -12,6 +12,7 @@ const corsOptions = {
 };
 
 const mongoURL = `mongodb+srv://Star:Star1234@cluster0.gsnssvn.mongodb.net/STAR`;
+const Schema = mongoose.Schema;
 
 const connectDB = async () => {
   try {
@@ -49,11 +50,12 @@ const CSULA_Courses = mongoose.model(
   "CSULA_Course",
   new mongoose.Schema(
     {
-      subject_code: Array,
+      course_code: Array,
       course_name: String,
       department: Array,
       credits: String,
       category: String,
+      block_type: String,
     },
     { collection: "CSULA_Courses" }
   )
@@ -63,13 +65,34 @@ const Courses = mongoose.model(
   "Course",
   new mongoose.Schema(
     {
-      subject_code: Array,
+      course_code: Array,
       course_name: String,
       department: Array,
       credits: String,
       category: String,
     },
     { collection: "Courses" }
+  )
+);
+
+const blockSchema = new Schema(
+  {
+    name: String,
+    desc: String,
+    req_credits: Number,
+  },
+  { _id: false }
+);
+
+const DeptReqBlocks = mongoose.model(
+  "DeptReqBlocks",
+  new mongoose.Schema(
+    {
+      name: String,
+      dept_id: String,
+      blocks: Array,
+    },
+    { collection: "dept_req_blocks" }
   )
 );
 
@@ -86,7 +109,6 @@ app.get("/fetch-institutes", async (req, res) => {
     const allData = await Schools.find({});
     res.json(allData);
   } catch (error) {
-    console.error("Error fetching schools:", error);
     res.status(500).json({ error: "An error occurred while fetching schools" });
   }
 });
@@ -95,27 +117,65 @@ app.get("/fetch-programs", async (req, res) => {
   const { collegeId } = req.query;
   try {
     const programs = await Programs.find({ s_id: collegeId });
-    console.log("programs", programs);
-
     res.json(programs);
-    console.log(`Programs for college ID ${collegeId}:`, programs);
   } catch (error) {
-    console.error("Error fetching programs:", error);
     res
       .status(500)
       .json({ error: "An error occurred while fetching programs" });
   }
 });
 
-// New endpoint for fetching CSULA courses
+// Function to determine block type for a course
+async function determineBlockType(course, departmentData) {
+  // console.log("3", course, departmentData);
+  try {
+    if (departmentData && departmentData.blocks) {
+      // console.log("4", departmentData.blocks);
+      for (const block of departmentData.blocks) {
+        console.log(
+          "first",
+          course,
+          course.course_code,
+          course?.block_type,
+          block.block_id
+        );
+        if (course.block_type && course.block_type === block.block_id) {
+          return block.block_id;
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error determining block type:", error);
+  }
+  return null;
+}
+
 app.get("/fetch-csula-courses", async (req, res) => {
   const { dept } = req.query;
   try {
+    const departmentData = await DeptReqBlocks.findOne({ dept_id: dept });
     const csulaCourses = await CSULA_Courses.find({ "department.id": dept });
-    console.log("CSULA courses", csulaCourses);
 
-    res.json(csulaCourses);
-    console.log("Fetched CSULA courses:", csulaCourses);
+    const blockWiseCourses = {};
+    const coursesWithoutBlock = [];
+
+    for (const course of csulaCourses) {
+      if (course.block_type) {
+        const blockType = await determineBlockType(course, departmentData);
+        if (blockType) {
+          if (!blockWiseCourses[blockType]) {
+            blockWiseCourses[blockType] = [];
+          }
+          blockWiseCourses[blockType].push(course);
+        } else {
+          coursesWithoutBlock.push(course);
+        }
+      } else {
+        coursesWithoutBlock.push(course);
+      }
+    }
+
+    res.json({ blockWiseCourses, coursesWithoutBlock });
   } catch (error) {
     console.error("Error fetching CSULA courses:", error);
     res
@@ -129,10 +189,7 @@ app.get("/fetch-courses", async (req, res) => {
   const { sid } = req.query;
   try {
     const courses = await Courses.find({ s_id: sid });
-    console.log("Courses for s_id:", courses);
-
     res.json(courses);
-    console.log(`Fetched courses for s_id ${sid}:`, courses);
   } catch (error) {
     console.error("Error fetching courses by s_id:", error);
     res
