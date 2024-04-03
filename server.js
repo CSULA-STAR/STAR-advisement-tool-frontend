@@ -75,6 +75,21 @@ const Courses = mongoose.model(
   )
 );
 
+const CourseTypes = mongoose.model(
+  "CourseTypes",
+  new mongoose.Schema(
+    {
+      types: [
+        {
+          id: String,
+          name: String,
+        },
+      ],
+    },
+    { collection: "course_types" }
+  )
+);
+
 const blockSchema = new Schema(
   {
     name: String,
@@ -155,7 +170,12 @@ app.get("/fetch-csula-courses", async (req, res) => {
   try {
     const departmentData = await DeptReqBlocks.findOne({ dept_id: dept });
     const csulaCourses = await CSULA_Courses.find({ "department.id": dept });
-
+    console.log(
+      "departmentData:",
+      departmentData,
+      "csulaCourses",
+      csulaCourses
+    );
     const blockWiseCourses = {};
     const coursesWithoutBlock = [];
 
@@ -184,6 +204,19 @@ app.get("/fetch-csula-courses", async (req, res) => {
   }
 });
 
+app.get("/fetch-all-csula-courses", async (req, res) => {
+  const { dept } = req.query;
+  try {
+    const csulaCourses = await CSULA_Courses.find({ "department.id": dept });
+    res.json(csulaCourses);
+  } catch (error) {
+    console.error("Error fetching CSULA courses:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching CSULA courses" });
+  }
+});
+
 // New endpoint for fetching courses by s_id
 app.get("/fetch-courses", async (req, res) => {
   const { sid } = req.query;
@@ -195,6 +228,18 @@ app.get("/fetch-courses", async (req, res) => {
     res
       .status(500)
       .json({ error: "An error occurred while fetching courses by s_id" });
+  }
+});
+
+app.get("/course-types", async (req, res) => {
+  try {
+    const course_types = await CourseTypes.find({});
+    res.json(course_types);
+  } catch (error) {
+    console.error("Error fetching courses types", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching course types" });
   }
 });
 

@@ -30,7 +30,7 @@ const CourseList = () => {
       const fetchCourses = async () => {
         try {
           const csulaResponse = await axios.get(
-            `http://localhost:3001/fetch-csula-courses?dept=${program.department}`
+            `http://localhost:3001/fetch-all-csula-courses?dept=${program.department}`
           );
           console.log("csulaResponse", csulaResponse.data);
           let filteredCourses = csulaResponse.data.filter(
@@ -90,9 +90,9 @@ const CourseList = () => {
       ...course,
       completed: checkboxResponses[course._id] ? true : false,
     }));
-
     navigate("/course-selection", {
       state: {
+        program: program,
         term: term.value,
         courseList: selectedCoursesWithFlag,
         startYear: startYear.value,

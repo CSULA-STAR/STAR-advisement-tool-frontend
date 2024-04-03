@@ -7,7 +7,12 @@ import {
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-const CustomModal = ({ openModal, handleModalClose, handleCommentClick }) => {
+const CustomModal = ({
+  openModal,
+  handleModalClose,
+  handleCommentClick,
+  fullSize,
+}) => {
   return (
     <Modal open={openModal} onClose={handleModalClose}>
       <div
@@ -16,6 +21,10 @@ const CustomModal = ({ openModal, handleModalClose, handleCommentClick }) => {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
+          width: fullSize ? "80%" : "auto",
+          height: fullSize ? "80%" : "auto",
+          maxHeight: "80%",
+          overflow: "auto",
         }}
       >
         <Paper sx={{ p: 4, position: "relative" }}>
