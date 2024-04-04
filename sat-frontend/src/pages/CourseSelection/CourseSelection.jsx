@@ -1,50 +1,74 @@
 import { Box, Button, Grid, Stack, Typography } from "@mui/material";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import CourseCard from "../../components/CourseCard";
-import CourseSelectorModal from "../../components/CourseSelectorModal/CourseSelectorModal";
 import { getNextTerm, getTermLabel } from "../../utils";
+import React from "react";
+import "../../pages/CourseSelection/courseSelectionStyle.css";
 
 export const CourseSelection = () => {
-  const [data, setData] = useState([]);
-  const [openCourseModal, setOpenCourseModal] = useState(false);
-  const [courseTypesData, setCourseTypesData] = useState([]);
-  const [courses, setCourses] = useState();
+  const course_types = [
+    "upper_division",
+    "lower_division",
+    "general_education",
+    "senior_design",
+    "technical_elective",
+  ];
+  const blocks = [
+    "block_c",
+    "block_d",
+    "block_a1",
+    "block_a2",
+    "us_constitution",
+    "us_history",
+    "block_e",
+  ];
 
+  const block_types = {
+    block_c: "Block C",
+    block_d: "Block D",
+    block_a1: "Block A1",
+    block_a2: "Block A2",
+    us_constitution: "US Constitution",
+    us_history: "US History",
+    block_e: "Block E",
+  };
+
+  const types = {
+    upper_division: "Upper Division",
+    lower_division: "Lower Division",
+    general_education: "General Education",
+    senior_design: "Senior Design",
+    technical_elective: " Technical Elective",
+  };
+
+  const [data, setData] = useState([]);
   const [checkboxResponses, setCheckboxResponses] = useState({});
   const navigate = useNavigate();
   const [navigationCount, setNavigationCount] = useState(0);
+  const [dataByBlock, setDataByBlock] = useState([]);
   const location = useLocation();
-  const { program, courseList, term } = location.state || {};
-  let startYear = location.state?.startYear;
+  const { courseList, term } = location.state || {};
+  let startYear = location.state.startYear;
+
   const handleCheckboxChange = (courseId, isChecked) => {
     setCheckboxResponses({ ...checkboxResponses, [courseId]: isChecked });
   };
+
   useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        console.log("program", program);
-        const courses = await axios.get(
-          `http://localhost:3001/fetch-csula-courses?dept=${program.department}`
-        );
-        const course_types = await axios.get(
-          "http://localhost:3001/course-types"
-        );
-
-        console.log("courses----", courses.data);
-        setCourses(courses.data);
-        setCourseTypesData(course_types.data[0].types);
-      } catch (error) {
-        console.error("Error fetching course types", error);
-      }
-    };
-
     const termCourseList = courseList.filter((course) => {
       return course.term.includes(getTermLabel(term));
     });
+
     setData(termCourseList);
-    fetchCourses();
+
+    const blockCourses = termCourseList.filter((course) => {
+      return course.course_type === "general_education";
+    });
+
+    setDataByBlock(blockCourses);
+
+    console.log("Block courses ", blockCourses);
   }, [courseList, term]);
 
   const handleNextClick = () => {
@@ -64,12 +88,13 @@ export const CourseSelection = () => {
 
     localStorage.setItem("selectedCourses", JSON.stringify(newCourses));
 
-    console.log("localStrorage..", localStorage.getItem("selectedCourses"));
+    console.log(localStorage.getItem("selectedCourses"));
     const filteredCourseList = courseList.filter(
       (course) => !checkboxResponses[course._id]
     );
     if (navigationCount < 5) {
       startYear = navigationCount === 2 ? startYear + 1 : startYear;
+      console.log("startyeaInselection" + startYear);
       navigate("/course-selection", {
         state: {
           courseList: filteredCourseList,
@@ -87,73 +112,100 @@ export const CourseSelection = () => {
       });
     }
   };
-  const handleCourseCardClick = () => {
-    setOpenCourseModal(true);
-  };
-
-  const handleModalClose = () => {
-    setOpenCourseModal(false);
-  };
 
   return (
-    <>
-      <Box sx={{ textAlign: "center" }}>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          padding={3}
-        >
-          <Typography variant="h4" component="div">
-            {getTermLabel(term)} {startYear}
-          </Typography>
-          <Box>
-            {/* <Button>Skip</Button> */}
-            <Button variant="contained" onClick={handleNextClick}>
-              Next
-            </Button>
-          </Box>
-        </Stack>
-        <Box sx={{ padding: 3 }}>
-          {courseTypesData.map((item) => (
-            <>
-              {item.id === "general_education" ? (
-                <>
-                  {Object.keys(data.blockWiseCourses).map((blockKey, index) => (
-                    <div key={index}>{blockKey}</div>
-                  ))}
-                </>
-              ) : null}
-              <Typography key={item.id} variant="h5">
-                {item.name}
-              </Typography>
-            </>
-          ))}
-
-          <Grid container spacing={2}>
-            {data.map((course) => (
-              <Grid item key={course._id} xs={12} sm={6} md={4} lg={3}>
-                <CourseCard
-                  onClick={handleCourseCardClick}
-                  enableCheckbox
-                  hoverable={true}
-                  course={course}
-                  addComment={true}
-                  onCheckboxChange={(isChecked) =>
-                    handleCheckboxChange(course._id, isChecked)
-                  }
-                />
-              </Grid>
-            ))}
-          </Grid>
+    <Box sx={{ textAlign: "center" }}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        padding={3}
+      >
+        <Typography variant="h4" component="div">
+          {getTermLabel(term)} {startYear}
+        </Typography>
+        <Box>
+          <Button>Skip</Button>
+          <Button variant="contained" onClick={handleNextClick}>
+            Next
+          </Button>
         </Box>
+      </Stack>
+      <Box sx={{ padding: 3 }}>
+        <Grid container spacing={2}>
+          {course_types.map((header) => (
+            <div key={header}>
+              <div className="course_type">
+                <h1>{types[header]}</h1>
+              </div>
+              <Grid container spacing={2} style={{ padding: 20 }}>
+                {header === "general_education"
+                  ? blocks.map((block) => {
+                      const blockCourses = data.filter(
+                        (course) =>
+                          course.course_type === header &&
+                          course.block_type === block
+                      );
+
+                      if (blockCourses.length > 0) {
+                        return (
+                          <React.Fragment key={block}>
+                            <Grid item xs={12}>
+                              <Typography className="blockTitle" variant="h5">
+                                {block_types[block]}
+                              </Typography>
+                            </Grid>
+                            {blockCourses.map((course) => (
+                              <Grid
+                                item
+                                xs={12}
+                                sm={6}
+                                md={4}
+                                lg={4}
+                                key={course._id}
+                              >
+                                <CourseCard
+                                  enableCheckbox
+                                  course={course}
+                                  onCheckboxChange={(isChecked) =>
+                                    handleCheckboxChange(course._id, isChecked)
+                                  }
+                                />
+                              </Grid>
+                            ))}
+                          </React.Fragment>
+                        );
+                      } else {
+                        return null;
+                      }
+                    })
+                  : data
+                      .filter((course) => course.course_type === header)
+                      .map((course) => (
+                        <Grid
+                          item
+                          xs={12}
+                          sm={6}
+                          md={4}
+                          lg={4}
+                          key={course._id}
+                        >
+                          <CourseCard
+                            enableCheckbox
+                            course={course}
+                            onCheckboxChange={(isChecked) =>
+                              handleCheckboxChange(course._id, isChecked)
+                            }
+                          />
+                        </Grid>
+                      ))}
+              </Grid>
+            </div>
+          ))}
+        </Grid>
       </Box>
-      <CourseSelectorModal
-        openModal={openCourseModal}
-        handleModalClose={handleModalClose}
-        // courses={}
-        // handleSubmit={}
-      />
-    </>
+    </Box>
   );
 };
+
+export default CourseSelection;
