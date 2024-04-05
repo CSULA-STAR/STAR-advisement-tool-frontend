@@ -9,19 +9,13 @@ export const extractCourseNumbers = (subjectCodes) => {
   });
 };
 
-export function getNextTerm(startTerm) {
-  const currentIndex = TERMS.findIndex((term) => term.value === startTerm);
+export const getNextTerm = (startTerm) => {
+  const currentIndex = TERMS.findIndex((term) => term.value === startTerm.term);
   if (currentIndex === -1) {
     throw new Error("Invalid start term");
   }
   const nextIndex = (currentIndex + 1) % TERMS.length;
-  const nextTerm = TERMS[nextIndex].value;
-  return nextTerm;
-}
-
-export const getTermLabel = (value) => {
-  const term = TERMS.find((term) => term.value === value);
-  return term ? term.label : null;
+  return TERMS[nextIndex].value;
 };
 
 export const getNextYears = (count) => {
@@ -33,6 +27,9 @@ export const getNextYears = (count) => {
   return years;
 };
 
+export const toSentenceCase = (str) => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
 export const getBlockNameById = (blocksArray, blockId) => {
   console.log("blockId", blocksArray, blockId);
   for (let i = 0; i < blocksArray.length; i++) {

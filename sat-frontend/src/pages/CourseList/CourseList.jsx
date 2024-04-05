@@ -1,4 +1,3 @@
-import React from "react";
 import ForwardRoundedIcon from "@mui/icons-material/ForwardRounded";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -10,17 +9,7 @@ import { Button, Typography } from "@material-ui/core";
 const CourseList = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { program, college, term } = location.state;
-
-  console.log("Location", program, college, term);
-  const startYear = location.state.startyear;
-  useEffect(() => {
-    if (location.state) {
-      console.log("CourseListYear:", startYear);
-    } else {
-      console.log("Location state is not available.");
-    }
-  }, [location.state]);
+  const { program, college, startTerm } = location.state;
   const [matchedCourses, setMatchedCourses] = useState([]);
   const [csulaCourseList, setCsulaCourseList] = useState([]);
   const [remainingCsulaCourses, setRemainingCsulaCourses] = useState([]);
@@ -42,7 +31,6 @@ const CourseList = () => {
           const selectedSchoolResponse = await axios.get(
             `http://localhost:3001/fetch-courses?sid=${college.id}`
           );
-          console.log("-->27", selectedSchoolResponse.data);
 
           const { matched, remainingCsula } = findMatchingCourses(
             filteredCourses,
@@ -82,7 +70,6 @@ const CourseList = () => {
   };
 
   const handleCheckboxChange = (courseId, isChecked) => {
-    console.log("courseId", courseId, isChecked);
     setCheckboxResponses({ ...checkboxResponses, [courseId]: isChecked });
   };
 
@@ -94,9 +81,8 @@ const CourseList = () => {
     navigate("/course-selection", {
       state: {
         program: program,
-        term: term.value,
+        startTerm: startTerm,
         courseList: selectedCoursesWithFlag,
-        startYear: startYear.value,
       },
     });
   };
@@ -104,9 +90,6 @@ const CourseList = () => {
   if (!program || !college) {
     return <div>Error: Missing program or college props</div>;
   }
-
-  console.log("csulaCourseList", csulaCourseList);
-  console.log("matchedCourses", matchedCourses);
 
   let selectedSchoolHeadingRendered = false;
   let csulaHeadingRendered = false;

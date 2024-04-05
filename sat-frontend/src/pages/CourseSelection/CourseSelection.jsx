@@ -1,10 +1,10 @@
-import { Box, Button, Grid, Stack, Typography, Card } from "@mui/material";
+import { Box, Button, Grid, Stack, Typography } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import CourseCard from "../../components/CourseCard";
 import CourseSelectorModal from "../../components/CourseSelectorModal/CourseSelectorModal";
-import { getBlockNameById, getNextTerm, getTermLabel } from "../../utils";
+import { getBlockNameById, getNextTerm, toSentenceCase } from "../../utils";
 import "./CourseSelectionStyle.css";
 
 export const CourseSelection = () => {
@@ -14,20 +14,16 @@ export const CourseSelection = () => {
   const [openCourseModal, setOpenCourseModal] = useState(false);
   const [courseTypesData, setCourseTypesData] = useState([]);
   const [courses, setCourses] = useState();
-
+  const [selectedCourses, setSelectedCourses] = useState([]);
   const [checkboxResponses, setCheckboxResponses] = useState({});
   const navigate = useNavigate();
   const [navigationCount, setNavigationCount] = useState(0);
   const location = useLocation();
-  const { program, courseList, term } = location.state || {};
-  let startYear = location.state?.startYear;
-  const handleCheckboxChange = (courseId, isChecked) => {
-    setCheckboxResponses({ ...checkboxResponses, [courseId]: isChecked });
-  };
+  const { program, courseList, startTerm } = location.state || {};
+
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        console.log("program", program);
         const courses = await axios.get(
           `http://localhost:3001/fetch-csula-courses?dept=${program.department}`
         );
@@ -47,7 +43,12 @@ export const CourseSelection = () => {
     };
 
     fetchCourses();
-  }, [courseList, term]);
+  }, [courseList, startTerm]);
+
+  const handleCheckboxChange = (courseId, isChecked) => {
+    setCheckboxResponses({ ...checkboxResponses, [courseId]: isChecked });
+    toggleCourseSelection(courseId);
+  };
 
   const handleNextClick = () => {
     let checkedCourses = courseList.filter(
@@ -58,25 +59,26 @@ export const CourseSelection = () => {
 
     checkedCourses = checkedCourses.map((course) => ({
       ...course,
-      selected_term: term,
-      startYear: startYear,
+      startTerm: startTerm,
     }));
 
     let newCourses = [...existingCourses, ...checkedCourses];
 
     localStorage.setItem("selectedCourses", JSON.stringify(newCourses));
 
-    console.log("localStrorage..", localStorage.getItem("selectedCourses"));
     const filteredCourseList = courseList.filter(
       (course) => !checkboxResponses[course._id]
     );
+
+    const nextTerm = getNextTerm(startTerm);
+    const nextYear =
+      nextTerm === "spring" ? startTerm.year + 1 : startTerm.year;
+
     if (navigationCount < 5) {
-      startYear = navigationCount === 2 ? startYear + 1 : startYear;
       navigate("/course-selection", {
         state: {
           courseList: filteredCourseList,
-          term: getNextTerm(term),
-          startYear,
+          startTerm: { term: nextTerm, year: nextYear },
         },
       });
       setNavigationCount(navigationCount + 1);
@@ -84,19 +86,41 @@ export const CourseSelection = () => {
       navigate("/selected-courses", {
         state: {
           courseList: filteredCourseList,
-          startYear,
+          startYear: startTerm.year,
         },
       });
     }
   };
+
   const handleCourseCardClick = (courseDetails) => {
     setModalData(courseDetails);
     setOpenCourseModal(true);
   };
 
+  const handleCourseCardSubmit = () => {
+    const selectedCoursesData = courseList.filter(
+      (course) => checkboxResponses[course._id]
+    );
+
+    console.log("Selected courses:", selectedCoursesData);
+    // Close the modal
+    handleModalClose();
+  };
+
   const handleModalClose = () => {
     setOpenCourseModal(false);
   };
+
+  const toggleCourseSelection = (courseId) => {
+    setSelectedCourses((prevSelected) => {
+      if (prevSelected.includes(courseId)) {
+        return prevSelected.filter((id) => id !== courseId);
+      } else {
+        return [...prevSelected, courseId];
+      }
+    });
+  };
+
   console.log("courseBlocks", courseBlocks);
   return (
     <>
@@ -108,10 +132,9 @@ export const CourseSelection = () => {
           padding={3}
         >
           <Typography variant="h4" component="div">
-            {getTermLabel(term)} {startYear}
+            {toSentenceCase(startTerm.term)} {startTerm.year}
           </Typography>
           <Box>
-            {/* <Button>Skip</Button> */}
             <Button variant="contained" onClick={handleNextClick}>
               Next
             </Button>
@@ -142,6 +165,7 @@ export const CourseSelection = () => {
                               course_name: "",
                               credits: "3",
                             }}
+                            selected={selectedCourses.includes(course._id)}
                             onCheckboxChange={(isChecked) =>
                               handleCheckboxChange(course._id, isChecked)
                             }
@@ -195,7 +219,8 @@ export const CourseSelection = () => {
         openModal={openCourseModal}
         handleModalClose={handleModalClose}
         courses={modalData}
-        // handleSubmit={}
+        // onSelectCourse={handleCourseCardClick}
+        onSubmit={handleCourseCardSubmit}
       />
     </>
   );
