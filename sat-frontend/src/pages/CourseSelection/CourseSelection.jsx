@@ -1,13 +1,16 @@
-import { Box, Button, Grid, Stack, Typography } from "@mui/material";
+import { Box, Button, Grid, Stack, Typography, Card } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import CourseCard from "../../components/CourseCard";
 import CourseSelectorModal from "../../components/CourseSelectorModal/CourseSelectorModal";
-import { getNextTerm, getTermLabel } from "../../utils";
+import { getBlockNameById, getNextTerm, getTermLabel } from "../../utils";
+import "./CourseSelectionStyle.css";
 
 export const CourseSelection = () => {
-  const [data, setData] = useState([]);
+  const [courseBlocks, setCourseBlocks] = useState([]);
+  const [modalData, setModalData] = useState([]);
+
   const [openCourseModal, setOpenCourseModal] = useState(false);
   const [courseTypesData, setCourseTypesData] = useState([]);
   const [courses, setCourses] = useState();
@@ -28,22 +31,21 @@ export const CourseSelection = () => {
         const courses = await axios.get(
           `http://localhost:3001/fetch-csula-courses?dept=${program.department}`
         );
+        const course_blocks = await axios.get(
+          `http://localhost:3001/fetch-req-block-details?dept=${program.department}`
+        );
         const course_types = await axios.get(
           "http://localhost:3001/course-types"
         );
 
-        console.log("courses----", courses.data);
         setCourses(courses.data);
+        setCourseBlocks(course_blocks.data);
         setCourseTypesData(course_types.data[0].types);
       } catch (error) {
         console.error("Error fetching course types", error);
       }
     };
 
-    const termCourseList = courseList.filter((course) => {
-      return course.term.includes(getTermLabel(term));
-    });
-    setData(termCourseList);
     fetchCourses();
   }, [courseList, term]);
 
@@ -87,14 +89,15 @@ export const CourseSelection = () => {
       });
     }
   };
-  const handleCourseCardClick = () => {
+  const handleCourseCardClick = (courseDetails) => {
+    setModalData(courseDetails);
     setOpenCourseModal(true);
   };
 
   const handleModalClose = () => {
     setOpenCourseModal(false);
   };
-
+  console.log("courseBlocks", courseBlocks);
   return (
     <>
       <Box sx={{ textAlign: "center" }}>
@@ -115,43 +118,83 @@ export const CourseSelection = () => {
           </Box>
         </Stack>
         <Box sx={{ padding: 3 }}>
-          {courseTypesData.map((item) => (
+          {courseTypesData?.map((item) => (
             <>
               {item.id === "general_education" ? (
                 <>
-                  {Object.keys(data.blockWiseCourses).map((blockKey, index) => (
-                    <div key={index}>{blockKey}</div>
-                  ))}
+                  <Typography key={item.id} variant="h5">
+                    {item.name}
+                  </Typography>
+                  <Grid container spacing={2}>
+                    {courses.blockWiseCourses?.map((course) => (
+                      <Grid item key={course._id} xs={12} sm={6} md={4} lg={3}>
+                        <Box>
+                          <CourseCard
+                            onClick={() => handleCourseCardClick(course.course)}
+                            enableCheckbox
+                            course={{
+                              course_code: [
+                                getBlockNameById(
+                                  courseBlocks.blocks,
+                                  course.type
+                                ),
+                              ],
+                              course_name: "",
+                              credits: "3",
+                            }}
+                            onCheckboxChange={(isChecked) =>
+                              handleCheckboxChange(course._id, isChecked)
+                            }
+                          />
+                        </Box>
+                      </Grid>
+                    ))}
+                  </Grid>
                 </>
-              ) : null}
-              <Typography key={item.id} variant="h5">
-                {item.name}
-              </Typography>
+              ) : (
+                <>
+                  <Typography
+                    key={item.id}
+                    variant="h5"
+                    className="type_heading"
+                  >
+                    {item.name}
+                  </Typography>
+                  <Grid container spacing={2}>
+                    {courses?.coursesWithoutBlock
+                      .filter((course) => course.course_type === item.id)
+                      .map((course) => (
+                        <Grid
+                          item
+                          key={course._id}
+                          xs={12}
+                          sm={6}
+                          md={4}
+                          lg={3}
+                        >
+                          <CourseCard
+                            onClick={handleCourseCardClick}
+                            enableCheckbox
+                            hoverable={true}
+                            course={course}
+                            addComment={true}
+                            onCheckboxChange={(isChecked) =>
+                              handleCheckboxChange(course._id, isChecked)
+                            }
+                          />
+                        </Grid>
+                      ))}
+                  </Grid>
+                </>
+              )}
             </>
           ))}
-
-          <Grid container spacing={2}>
-            {data.map((course) => (
-              <Grid item key={course._id} xs={12} sm={6} md={4} lg={3}>
-                <CourseCard
-                  onClick={handleCourseCardClick}
-                  enableCheckbox
-                  hoverable={true}
-                  course={course}
-                  addComment={true}
-                  onCheckboxChange={(isChecked) =>
-                    handleCheckboxChange(course._id, isChecked)
-                  }
-                />
-              </Grid>
-            ))}
-          </Grid>
         </Box>
       </Box>
       <CourseSelectorModal
         openModal={openCourseModal}
         handleModalClose={handleModalClose}
-        // courses={}
+        courses={modalData}
         // handleSubmit={}
       />
     </>

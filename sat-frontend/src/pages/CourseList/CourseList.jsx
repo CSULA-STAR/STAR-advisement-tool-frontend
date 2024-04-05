@@ -1,10 +1,11 @@
+import React from "react";
 import ForwardRoundedIcon from "@mui/icons-material/ForwardRounded";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import CourseCard from "../../components/CourseCard";
 import "./CourseListStyle.css";
-import { Button } from "@material-ui/core";
+import { Button, Typography } from "@material-ui/core";
 
 const CourseList = () => {
   const navigate = useNavigate();
@@ -112,6 +113,9 @@ const CourseList = () => {
 
   return (
     <div className="course-list-container">
+      <Typography variant="h4" style={{ paddingBottom: "30px" }}>
+        Transferable courses
+      </Typography>
       {matchedCourses.map(({ csulaCourse, selectedCourse }) => (
         <div className="course-row" key={csulaCourse._id}>
           <div className="college-column">
@@ -138,7 +142,7 @@ const CourseList = () => {
               <ForwardRoundedIcon style={{ fontSize: 40 }} />
             </div>
           </div>
-          <div className="college-column">
+          <div className="college-column center-column">
             {!csulaHeadingRendered && <h2>Cal State LA Courses</h2>}
             <CourseCard
               hoverable={true}

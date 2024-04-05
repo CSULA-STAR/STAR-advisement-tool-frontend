@@ -32,3 +32,13 @@ export const getNextYears = (count) => {
   }
   return years;
 };
+
+export const getBlockNameById = (blocksArray, blockId) => {
+  console.log("blockId", blocksArray, blockId);
+  for (let i = 0; i < blocksArray.length; i++) {
+    if (blocksArray[i].block_id === blockId) {
+      return blocksArray[i].name;
+    }
+  }
+  return null;
+};

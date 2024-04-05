@@ -67,7 +67,7 @@ const CourseCard = ({
 
   return (
     <>
-      {compactView ? (
+      {!compactView ? (
         <Card
           // variant="outlined"
           onMouseEnter={hoverable && handleMouseEnter}
@@ -206,7 +206,7 @@ const CourseCard = ({
             sx={{ maxWidth: 360 }}
             style={{ marginBottom: "10px", backgroundColor: "#e3e2e7" }}
           >
-            <Box sx={{ p: 2 }}>
+            <Box sx={{ p: 1.2 }}>
               <Stack
                 direction="row"
                 justifyContent="space-between"
@@ -214,26 +214,18 @@ const CourseCard = ({
               >
                 <Stack direction="row" alignItems="center">
                   {enableCheckbox && (
-                    <Typography gutterBottom>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            color="primary"
-                            checked={isChecked}
-                            onChange={handleCheckboxChange}
-                            gutterBottom
-                          />
-                        }
-                      />
-                    </Typography>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          color="primary"
+                          checked={isChecked}
+                          onChange={handleCheckboxChange}
+                        />
+                      }
+                    />
                   )}
                   {course_code?.map((code, index) => (
-                    <Typography
-                      gutterBottom
-                      variant="h6"
-                      key={index}
-                      component="div"
-                    >
+                    <Typography variant="subtitle2" key={index} component="div">
                       <strong>
                         {code}
                         {index < course_code.length - 1 ? "/ " : ""}
@@ -241,9 +233,24 @@ const CourseCard = ({
                     </Typography>
                   ))}
                 </Stack>
-                <Typography gutterBottom variant="h6" component="div">
+                <Typography variant="subtitle2" component="div">
                   {credits}
                 </Typography>
+              </Stack>
+              <Stack>
+                <Tooltip title={course_name}>
+                  <Typography
+                    color="text.secondary"
+                    variant="body2"
+                    style={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {course_name}
+                  </Typography>
+                </Tooltip>
               </Stack>
             </Box>
           </Card>
@@ -268,12 +275,12 @@ CourseCard.propTypes = {
       })
     ).isRequired,
     pre_requisite: PropTypes.shape({
-      description: PropTypes.string.isRequired,
-      course_code: PropTypes.array.isRequired,
+      description: PropTypes.string,
+      course_code: PropTypes.array,
     }),
     co_requisite: PropTypes.shape({
-      description: PropTypes.string.isRequired,
-      course_code: PropTypes.array.isRequired,
+      description: PropTypes.string,
+      course_code: PropTypes.array,
     }),
     term: PropTypes.array,
   }),

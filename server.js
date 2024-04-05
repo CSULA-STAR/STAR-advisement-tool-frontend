@@ -142,18 +142,9 @@ app.get("/fetch-programs", async (req, res) => {
 
 // Function to determine block type for a course
 async function determineBlockType(course, departmentData) {
-  // console.log("3", course, departmentData);
   try {
     if (departmentData && departmentData.blocks) {
-      // console.log("4", departmentData.blocks);
       for (const block of departmentData.blocks) {
-        console.log(
-          "first",
-          course,
-          course.course_code,
-          course?.block_type,
-          block.block_id
-        );
         if (course.block_type && course.block_type === block.block_id) {
           return block.block_id;
         }
@@ -170,23 +161,22 @@ app.get("/fetch-csula-courses", async (req, res) => {
   try {
     const departmentData = await DeptReqBlocks.findOne({ dept_id: dept });
     const csulaCourses = await CSULA_Courses.find({ "department.id": dept });
-    console.log(
-      "departmentData:",
-      departmentData,
-      "csulaCourses",
-      csulaCourses
-    );
-    const blockWiseCourses = {};
+
+    const blockWiseCourses = []; // Initialize as array
     const coursesWithoutBlock = [];
 
     for (const course of csulaCourses) {
       if (course.block_type) {
         const blockType = await determineBlockType(course, departmentData);
         if (blockType) {
-          if (!blockWiseCourses[blockType]) {
-            blockWiseCourses[blockType] = [];
+          const index = blockWiseCourses.findIndex(
+            (block) => block.type === blockType
+          );
+          if (index === -1) {
+            blockWiseCourses.push({ type: blockType, course: [course] });
+          } else {
+            blockWiseCourses[index].course.push(course);
           }
-          blockWiseCourses[blockType].push(course);
         } else {
           coursesWithoutBlock.push(course);
         }
@@ -240,6 +230,20 @@ app.get("/course-types", async (req, res) => {
     res
       .status(500)
       .json({ error: "An error occurred while fetching course types" });
+  }
+});
+
+app.get("/fetch-req-block-details", async (req, res) => {
+  const { dept } = req.query;
+  try {
+    const departmentData = await DeptReqBlocks.findOne({ dept_id: dept });
+    console.log("departmentData", departmentData);
+    res.json(departmentData);
+  } catch (error) {
+    console.error("Error fetching Block data courses:", error);
+    res
+      .status(500)
+      .json({ error: "An error occurred while fetching Block data" });
   }
 });
 

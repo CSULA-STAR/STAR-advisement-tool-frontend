@@ -36,6 +36,15 @@ body {
 
 .main-content {
   flex-grow: 1;
+  padding: 1rem;
+  margin-top: 84px;
+}
+
+
+#root {
+  /* margin: 0 0; */
+  padding: 2rem;
+  text-align: center;
 }
 
 ul {

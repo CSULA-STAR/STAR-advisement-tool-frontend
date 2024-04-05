@@ -1,11 +1,16 @@
-import { Modal, Box, Typography, Paper } from "@mui/material";
+import { Modal, Box, Typography, Paper, Button } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import CourseCard from "../CourseCard";
+import { useState } from "react";
 
 const CourseSelectorModal = ({
   openModal,
   handleModalClose,
   handleCommentClick,
+  courses,
 }) => {
+  const handleCheckboxChange = () => {};
+  const handleSubmitClick = () => {};
   return (
     <Modal
       open={openModal}
@@ -26,8 +31,35 @@ const CourseSelectorModal = ({
           }}
         >
           <Box p={2}>
-            <Typography variant="h5">Hello!</Typography>
-            {/* Add your content here */}
+            <Box
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                paddingBottom: "20px",
+              }}
+            >
+              <Typography variant="h5">Select Courses from Block</Typography>
+              <Button onClick={handleModalClose} variant="text">
+                <CloseIcon />
+              </Button>
+            </Box>
+            {courses?.map((course) => (
+              <CourseCard
+                compactView={true}
+                key={course._id}
+                enableCheckbox
+                hoverable={false}
+                course={course}
+                addComment={true}
+                onCheckboxChange={(isChecked) =>
+                  handleCheckboxChange(course._id, isChecked)
+                }
+              />
+            ))}
+
+            <Button variant="contained" onClick={handleSubmitClick}>
+              Submit
+            </Button>
           </Box>
         </Paper>
       </Box>
