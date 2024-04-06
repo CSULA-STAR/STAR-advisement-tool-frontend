@@ -26,6 +26,7 @@ const CourseCard = ({
   isBlock,
   onClick,
   compactView,
+  requsiteRequired,
 }) => {
   const {
     course_name,
@@ -74,7 +75,10 @@ const CourseCard = ({
           onMouseLeave={hoverable && handleMouseLeave}
           onClick={onClick}
           sx={{ maxWidth: 360 }}
-          style={{ marginBottom: "10px", backgroundColor: "#e3e2e7" }}
+          style={{
+            marginBottom: "10px",
+            backgroundColor: requsiteRequired ? "#a4a7b0" : "#e3e2e7",
+          }}
         >
           <Box sx={{ p: 2 }}>
             <Stack
@@ -160,9 +164,23 @@ const CourseCard = ({
                   <Stack direction="row" spacing={2}>
                     {pre_requisite?.course_code.length ? (
                       <>
-                        <Typography variant="body2">Pre-requsites:</Typography>
+                        <Typography variant="body2">Pre-requisites:</Typography>
+
                         <Tooltip title={pre_requisite?.description}>
-                          <Typography gutterBottom variant="body2">
+                          <Typography
+                            gutterBottom
+                            variant="body2"
+                            style={
+                              requsiteRequired
+                                ? {
+                                    color: "red",
+                                    textDecoration: "underline",
+                                    textDecorationColor: "red",
+                                    textDecorationStyle: "solid",
+                                  }
+                                : {}
+                            }
+                          >
                             {pre_requisite?.course_code?.join(", ")}
                           </Typography>
                         </Tooltip>
@@ -292,6 +310,8 @@ CourseCard.propTypes = {
   isBlock: PropTypes.bool,
   onClick: PropTypes.func,
   compactView: PropTypes.bool,
+  selected: PropTypes.bool,
+  requsiteRequired: PropTypes.bool,
 };
 
 export default CourseCard;
