@@ -42,13 +42,13 @@ const Home = () => {
       alert("Please select all fields before submitting.");
       return;
     }
-    console.log("selectedTerm, startYear", selectedTerm, startYear);
-    const startTerm = { term: selectedTerm?.value, year: startYear?.value };
+
     navigate("/courselist", {
       state: {
         program: selectedProgram,
         college: college,
-        startTerm: startTerm,
+        term: selectedTerm,
+        startyear: startYear,
       },
     });
   };
@@ -102,10 +102,6 @@ const Home = () => {
     fetchPrograms();
   }, [college]);
 
-  const filteredTerms = TERMS.filter(
-    (term) => term.value === "fall" || term.value === "spring"
-  );
-
   return (
     <Box sx={{ textAlign: "center" }}>
       <Stack direction="column" alignItems="center" spacing={2}>
@@ -129,7 +125,7 @@ const Home = () => {
         {selectedProgram && (
           <SelectionDropdown
             label="Start Term"
-            options={filteredTerms}
+            options={TERMS}
             value={selectedTerm}
             onChange={handleTermChange}
           />

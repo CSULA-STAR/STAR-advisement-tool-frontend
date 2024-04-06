@@ -1,53 +1,76 @@
 import { Box, Button, Grid, Stack, Typography } from "@mui/material";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import CourseCard from "../../components/CourseCard";
-import CourseSelectorModal from "../../components/CourseSelectorModal/CourseSelectorModal";
-import { getBlockNameById, getNextTerm, toSentenceCase } from "../../utils";
-import "./CourseSelectionStyle.css";
+import { getNextTerm, getTermLabel } from "../../utils";
+import React from "react";
+import "../../pages/CourseSelection/courseSelectionStyle.css";
+import BlockModal from "../../components/BlockModal/BlockModal";
 
 export const CourseSelection = () => {
-  const [courseBlocks, setCourseBlocks] = useState([]);
-  const [modalData, setModalData] = useState([]);
+  const course_types = [
+    "upper_division",
+    "lower_division",
+    "general_education",
+    "senior_design",
+    "technical_elective",
+  ];
+  const blocks = [
+    "block_c",
+    "block_d",
+    "block_a1",
+    "block_a2",
+    "us_constitution",
+    "us_history",
+    "block_e",
+  ];
 
-  const [openCourseModal, setOpenCourseModal] = useState(false);
-  const [courseTypesData, setCourseTypesData] = useState([]);
-  const [courses, setCourses] = useState();
-  const [selectedCourses, setSelectedCourses] = useState([]);
+  const block_types = {
+    block_c: "Block C",
+    block_d: "Block D",
+    block_a1: "Block A1",
+    block_a2: "Block A2",
+    us_constitution: "US Constitution",
+    us_history: "US History",
+    block_e: "Block E",
+  };
+
+  const types = {
+    upper_division: "Upper Division",
+    lower_division: "Lower Division",
+    general_education: "General Education",
+    senior_design: "Senior Design",
+    technical_elective: " Technical Elective",
+  };
+
+  const [data, setData] = useState([]);
   const [checkboxResponses, setCheckboxResponses] = useState({});
   const navigate = useNavigate();
   const [navigationCount, setNavigationCount] = useState(0);
   const location = useLocation();
-  const { program, courseList, startTerm } = location.state || {};
+  const { courseList, term } = location.state || {};
+  let startYear = location.state.startYear;
+
+  //modal Changes
+  const [genEduCourse, setGenEduCourse] = useState([]);
 
   useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const courses = await axios.get(
-          `http://localhost:3001/fetch-csula-courses?dept=${program.department}`
-        );
-        const course_blocks = await axios.get(
-          `http://localhost:3001/fetch-req-block-details?dept=${program.department}`
-        );
-        const course_types = await axios.get(
-          "http://localhost:3001/course-types"
-        );
+    const termCourseList = courseList.filter((course) => {
+      return course.term.includes(getTermLabel(term));
+    });
 
-        setCourses(courses.data);
-        setCourseBlocks(course_blocks.data);
-        setCourseTypesData(course_types.data[0].types);
-      } catch (error) {
-        console.error("Error fetching course types", error);
-      }
-    };
+    const genEdu = courseList.filter((course) => {
+      return course.course_type === "general_education";
+    });
 
-    fetchCourses();
-  }, [courseList, startTerm]);
+    setGenEduCourse(genEdu);
+
+    setData(termCourseList);
+    console.log("Data : ", termCourseList);
+  }, [courseList, term]);
 
   const handleCheckboxChange = (courseId, isChecked) => {
     setCheckboxResponses({ ...checkboxResponses, [courseId]: isChecked });
-    toggleCourseSelection(courseId);
   };
 
   const handleNextClick = () => {
@@ -57,28 +80,44 @@ export const CourseSelection = () => {
     let existingCourses = localStorage.getItem("selectedCourses");
     existingCourses = existingCourses ? JSON.parse(existingCourses) : [];
 
+    // Include prerequisites of checked courses in localStorage
+    checkedCourses.forEach((course) => {
+      course.pre_requisite.course_code.forEach((prerequisite) => {
+        if (!existingCourses.some((c) => c._id === prerequisite)) {
+          const prerequisiteCourse = courseList.find(
+            (c) => c._id === prerequisite
+          );
+          if (prerequisiteCourse) {
+            existingCourses.push(prerequisiteCourse);
+          }
+        }
+      });
+    });
+
+    console.log("existingCourses>>>>>>", existingCourses);
+
     checkedCourses = checkedCourses.map((course) => ({
       ...course,
-      startTerm: startTerm,
+      selected_term: term,
+      startYear: startYear,
     }));
 
     let newCourses = [...existingCourses, ...checkedCourses];
 
     localStorage.setItem("selectedCourses", JSON.stringify(newCourses));
 
+    console.log(localStorage.getItem("selectedCourses"));
     const filteredCourseList = courseList.filter(
       (course) => !checkboxResponses[course._id]
     );
-
-    const nextTerm = getNextTerm(startTerm);
-    const nextYear =
-      nextTerm === "spring" ? startTerm.year + 1 : startTerm.year;
-
     if (navigationCount < 5) {
+      startYear = navigationCount === 2 ? startYear + 1 : startYear;
+      console.log("startyeaInselection" + startYear);
       navigate("/course-selection", {
         state: {
           courseList: filteredCourseList,
-          startTerm: { term: nextTerm, year: nextYear },
+          term: getNextTerm(term),
+          startYear,
         },
       });
       setNavigationCount(navigationCount + 1);
@@ -86,142 +125,124 @@ export const CourseSelection = () => {
       navigate("/selected-courses", {
         state: {
           courseList: filteredCourseList,
-          startYear: startTerm.year,
+          startYear,
         },
       });
     }
   };
 
-  const handleCourseCardClick = (courseDetails) => {
-    setModalData(courseDetails);
-    setOpenCourseModal(true);
-  };
-
-  const handleCourseCardSubmit = () => {
-    const selectedCoursesData = courseList.filter(
-      (course) => checkboxResponses[course._id]
-    );
-
-    console.log("Selected courses:", selectedCoursesData);
-    // Close the modal
-    handleModalClose();
-  };
-
-  const handleModalClose = () => {
-    setOpenCourseModal(false);
-  };
-
-  const toggleCourseSelection = (courseId) => {
-    setSelectedCourses((prevSelected) => {
-      if (prevSelected.includes(courseId)) {
-        return prevSelected.filter((id) => id !== courseId);
-      } else {
-        return [...prevSelected, courseId];
-      }
-    });
-  };
-
-  console.log("courseBlocks", courseBlocks);
   return (
-    <>
-      <Box sx={{ textAlign: "center" }}>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          padding={3}
-        >
-          <Typography variant="h4" component="div">
-            {toSentenceCase(startTerm.term)} {startTerm.year}
-          </Typography>
-          <Box>
-            <Button variant="contained" onClick={handleNextClick}>
-              Next
-            </Button>
-          </Box>
-        </Stack>
-        <Box sx={{ padding: 3 }}>
-          {courseTypesData?.map((item) => (
-            <>
-              {item.id === "general_education" ? (
-                <>
-                  <Typography key={item.id} variant="h5">
-                    {item.name}
-                  </Typography>
-                  <Grid container spacing={2}>
-                    {courses.blockWiseCourses?.map((course) => (
-                      <Grid item key={course._id} xs={12} sm={6} md={4} lg={3}>
-                        <Box>
-                          <CourseCard
-                            onClick={() => handleCourseCardClick(course.course)}
-                            enableCheckbox
-                            course={{
-                              course_code: [
-                                getBlockNameById(
-                                  courseBlocks.blocks,
-                                  course.type
-                                ),
-                              ],
-                              course_name: "",
-                              credits: "3",
-                            }}
-                            selected={selectedCourses.includes(course._id)}
-                            onCheckboxChange={(isChecked) =>
-                              handleCheckboxChange(course._id, isChecked)
-                            }
-                          />
-                        </Box>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </>
-              ) : (
-                <>
-                  <Typography
-                    key={item.id}
-                    variant="h5"
-                    className="type_heading"
-                  >
-                    {item.name}
-                  </Typography>
-                  <Grid container spacing={2}>
-                    {courses?.coursesWithoutBlock
-                      .filter((course) => course.course_type === item.id)
-                      .map((course) => (
-                        <Grid
-                          item
-                          key={course._id}
-                          xs={12}
-                          sm={6}
-                          md={4}
-                          lg={3}
-                        >
-                          <CourseCard
-                            onClick={handleCourseCardClick}
-                            enableCheckbox
-                            hoverable={true}
-                            course={course}
-                            addComment={true}
-                            onCheckboxChange={(isChecked) =>
-                              handleCheckboxChange(course._id, isChecked)
-                            }
-                          />
-                        </Grid>
-                      ))}
-                  </Grid>
-                </>
-              )}
-            </>
-          ))}
+    <Box sx={{ textAlign: "center" }}>
+      <Stack
+        direction="row"
+        justifyContent="space-between"
+        alignItems="center"
+        padding={3}
+      >
+        <Typography variant="h4" component="div">
+          {getTermLabel(term)} {startYear}
+        </Typography>
+        <Box>
+          <Button variant="contained" onClick={handleNextClick}>
+            Next
+          </Button>
         </Box>
+      </Stack>
+      <Box sx={{ padding: 3 }}>
+        <Grid container spacing={2}>
+          {course_types.map((header) => {
+            const isGeneralEducation = header === "general_education";
+            let coursesForType = isGeneralEducation
+              ? genEduCourse
+              : data.filter((course) => course.course_type === header);
+
+            const coursesToShow = isGeneralEducation
+              ? blocks
+                  .filter((block) =>
+                    coursesForType.some((course) => course.block_type === block)
+                  )
+                  .map((block) => ({
+                    block,
+                    courses: coursesForType.filter(
+                      (course) => course.block_type === block
+                    ),
+                  }))
+              : [{ courses: coursesForType }];
+
+            if (coursesToShow.some(({ courses }) => courses.length > 0)) {
+              return (
+                <div key={header}>
+                  <div className="course_type">
+                    <h1>{types[header]}</h1>
+                  </div>
+                  <Grid container spacing={2} style={{ padding: 20 }}>
+                    {isGeneralEducation
+                      ? coursesToShow.map(({ block, courses }) => (
+                          <Grid
+                            item
+                            xs={12}
+                            sm={6}
+                            md={4}
+                            lg={4}
+                            key={courses._id}
+                          >
+                            <BlockModal
+                              key={block}
+                              enableCheckbox
+                              data={courses}
+                              block={block}
+                              handleCheckboxChange={handleCheckboxChange}
+                            />
+                          </Grid>
+                        ))
+                      : coursesToShow[0].courses.map((course) => {
+                          const selectedCourses = JSON.parse(
+                            localStorage.getItem("selectedCourses")
+                          );
+
+                          const prerequisitesPresent =
+                            course.pre_requisite.course_code.every(
+                              (prerequisite) => {
+                                return selectedCourses.some((selectedCourse) =>
+                                  selectedCourse.course_code.includes(
+                                    prerequisite
+                                  )
+                                );
+                              }
+                            );
+
+                          return (
+                            <Grid
+                              item
+                              xs={12}
+                              sm={6}
+                              md={4}
+                              lg={4}
+                              key={course._id}
+                            >
+                              <CourseCard
+                                enableCheckbox={prerequisitesPresent}
+                                requsiteRequired={!prerequisitesPresent}
+                                hoverable={true}
+                                course={course}
+                                onCheckboxChange={(isChecked) =>
+                                  handleCheckboxChange(course._id, isChecked)
+                                }
+                              />
+                            </Grid>
+                          );
+                        })}
+                  </Grid>
+                </div>
+              );
+            } else {
+              return null;
+            }
+          })}
+        </Grid>
       </Box>
-      <CourseSelectorModal
-        openModal={openCourseModal}
-        handleModalClose={handleModalClose}
-        courses={modalData}
-        // onSelectCourse={handleCourseCardClick}
-        onSubmit={handleCourseCardSubmit}
-      />
-    </>
+    </Box>
   );
 };
+
+export default CourseSelection;

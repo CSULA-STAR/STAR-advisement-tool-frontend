@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* justify-content: space-between; */
+  justify-content: space-between;
   overflow-y: auto;
   scrollbar-width: none;
 }
@@ -11,7 +11,9 @@
 }
 
 .college-column {
-  width: 48%;
+  /* width: 48%; */
+  /* padding: 10px; */
+  align-items: center;
 }
 
 .college-column h2 {
@@ -51,6 +53,9 @@
   margin-bottom: 20px;
 }
 
+.college-column {
+  width: 45%;
+}
 .floating-button {
   position: fixed;
   bottom: 20px;
@@ -61,4 +66,31 @@
   .college-column {
     width: 100%;
   }
+}
+
+.course_type {
+  display: block;
+  background-color: rgb(199, 200, 200);
+  margin: 20px 0;
+  width: 100vw;
+  height: 40px;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+
+.blocks {
+  width: 100%; /* Ensure blocks take full width */
+  margin-left: 0; /* Remove left margin to center the blocks */
+}
+
+.blockTitle {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-bottom: 30px;
+  color: rgb(85, 85, 253);
+}
+.course-group {
+  padding: 0 150px;
 }
