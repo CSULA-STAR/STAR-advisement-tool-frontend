@@ -26,6 +26,7 @@ export default function BlockModal({
   block,
   handleCheckboxChange,
   enableCheckbox,
+  checkboxResponses,
 }) {
   const [open, setOpen] = useState(false);
   const handleOpen = () => {
@@ -40,14 +41,15 @@ export default function BlockModal({
   };
 
   return (
-    <div style={{ margin: "auto" }}>
+    <>
       <Button
         onClick={handleOpen}
         style={{
-          backgroundColor: "#C7C8C8",
+          backgroundColor: "#e3e2e7",
           color: "black",
-          width: 350,
-          height: 80,
+          width: 360,
+          height: 110,
+          borderRadius: 7,
         }}
       >
         <strong> {block}</strong>
@@ -79,6 +81,7 @@ export default function BlockModal({
                   enableCheckbox
                   course={course}
                   onCheckboxChange={handleCheckboxChange}
+                  isChecked={checkboxResponses[course._id] || false}
                 />
               </Grid>
             ))}
@@ -97,6 +100,6 @@ export default function BlockModal({
           </Button>
         </Box>
       </Modal>
-    </div>
+    </>
   );
 }

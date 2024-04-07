@@ -217,7 +217,17 @@ const CourseList = () => {
                         {(selectedSchoolHeadingRendered = true)}
                       </div>
                       <div className="arrow-column">
-                        <ForwardRoundedIcon style={{ fontSize: 40 }} />
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            height: "100%",
+                            marginLeft: 100,
+                            marginRight: 100,
+                          }}
+                        >
+                          <ForwardRoundedIcon style={{ fontSize: 40 }} />
+                        </div>
                       </div>
                       <div className="college-column">
                         {!csulaHeadingRendered && <h2>Cal State LA Courses</h2>}

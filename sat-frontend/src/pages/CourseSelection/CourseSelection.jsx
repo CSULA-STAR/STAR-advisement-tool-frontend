@@ -6,7 +6,8 @@ import { getNextTerm, getTermLabel } from "../../utils";
 import React from "react";
 import "../../pages/CourseSelection/courseSelectionStyle.css";
 import BlockModal from "../../components/BlockModal/BlockModal";
-
+import Badge from "@mui/material/Badge";
+import DoneOutlinedIcon from "@mui/icons-material/DoneOutlined";
 export const CourseSelection = () => {
   const course_types = [
     "upper_division",
@@ -24,16 +25,6 @@ export const CourseSelection = () => {
     "us_history",
     "block_e",
   ];
-
-  const block_types = {
-    block_c: "Block C",
-    block_d: "Block D",
-    block_a1: "Block A1",
-    block_a2: "Block A2",
-    us_constitution: "US Constitution",
-    us_history: "US History",
-    block_e: "Block E",
-  };
 
   const types = {
     upper_division: "Upper Division",
@@ -152,6 +143,7 @@ export const CourseSelection = () => {
         <Grid container spacing={2}>
           {course_types.map((header) => {
             const isGeneralEducation = header === "general_education";
+
             let coursesForType = isGeneralEducation
               ? genEduCourse
               : data.filter((course) => course.course_type === header);
@@ -175,7 +167,7 @@ export const CourseSelection = () => {
                   <div className="course_type">
                     <h1>{types[header]}</h1>
                   </div>
-                  <Grid container spacing={2} style={{ padding: 20 }}>
+                  <Grid container spacing={5} style={{ padding: 20 }}>
                     {isGeneralEducation
                       ? coursesToShow.map(({ block, courses }) => (
                           <Grid
@@ -184,15 +176,32 @@ export const CourseSelection = () => {
                             sm={6}
                             md={4}
                             lg={4}
+                            spacing={5}
                             key={courses._id}
+                            style={{ marginLeft: -45, marginRight: 40 }}
                           >
-                            <BlockModal
-                              key={block}
-                              enableCheckbox
-                              data={courses}
-                              block={block}
-                              handleCheckboxChange={handleCheckboxChange}
-                            />
+                            <Badge
+                              badgeContent={
+                                <DoneOutlinedIcon
+                                  fontSize="large"
+                                  color="success"
+                                />
+                              }
+                              invisible={
+                                !courses.some(
+                                  (course) => checkboxResponses[course._id]
+                                )
+                              }
+                            >
+                              <BlockModal
+                                key={block}
+                                enableCheckbox
+                                data={courses}
+                                block={block}
+                                handleCheckboxChange={handleCheckboxChange}
+                                checkboxResponses={checkboxResponses}
+                              />
+                            </Badge>
                           </Grid>
                         ))
                       : coursesToShow[0].courses.map((course) => {
