@@ -4,26 +4,17 @@ import { useState, useEffect } from "react";
 import "./style.css";
 import IconButton from "@mui/material/IconButton";
 import PrintIcon from "@mui/icons-material/Print";
-import { extractCourseNumbers } from "../../utils";
 import { Typography } from "@mui/material";
+import { toSentenceCase } from "../../utils";
 
 const SelectedCoursesPage = () => {
   const location = useLocation();
-  const { courseList, startYear } = location.state || {};
-  const [SelectedCourses, setSelectedCourses] = useState([]);
+  const { courseList } = location.state || {};
+  const [selectedCourses, setSelectedCourses] = useState([]);
 
   useEffect(() => {
     setSelectedCourses(JSON.parse(localStorage.getItem("selectedCourses")));
   }, []);
-
-  const coursesByYearAndTerm = (yearOffset, term) => {
-    return SelectedCourses.filter((course) => {
-      return (
-        course.selected_term?.toLowerCase() === term.toLowerCase() &&
-        course.startYear === startYear + yearOffset
-      );
-    });
-  };
 
   const handleCommentClick = (course) => {
     console.log("Adding comment for course:", course);
@@ -31,6 +22,51 @@ const SelectedCoursesPage = () => {
 
   const handlePrintScreen = () => {
     window.print();
+  };
+  const coursesByTermAndYear = () => {
+    const courses = {};
+    selectedCourses.forEach((course) => {
+      const { term, year } = course.selected_term;
+      if (!courses[year]) {
+        courses[year] = {};
+      }
+      if (!courses[year][term]) {
+        courses[year][term] = [];
+      }
+      courses[year][term].push(course);
+    });
+    return courses;
+  };
+
+  const renderCourseDetails = (courses) => {
+    const rows = [];
+    Object.keys(courses).forEach((year) => {
+      rows.push(
+        <tr key={year}>
+          <td>{year}</td>
+          <td>
+            {courses[year]["spring"] && renderCourses(courses[year]["spring"])}
+          </td>
+          <td>
+            {courses[year]["summer"] && renderCourses(courses[year]["summer"])}
+          </td>
+          <td>
+            {courses[year]["fall"] && renderCourses(courses[year]["fall"])}
+          </td>
+        </tr>
+      );
+    });
+    return rows;
+  };
+
+  const renderCourses = (courses) => {
+    return courses.map((course) => (
+      <div key={course._id}>
+        <p>{course.course_name}</p>
+        <p>Credits: {course.credits}</p>
+        <p>Pre-requisite: {course.pre_requisite.description}</p>
+      </div>
+    ));
   };
 
   return (
@@ -45,86 +81,7 @@ const SelectedCoursesPage = () => {
               <th>Fall</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td>{startYear - 1}</td>
-              <td>
-                {coursesByYearAndTerm(-1, "Spring").map((course, index) => (
-                  <div key={index} className="courseDetails">
-                    <h5>{course.course_code}</h5>
-                    {course.course_name} <br />
-                    Pre-requisite :{" "}
-                    {course.pre_requisite?.course_code
-                      .map((id) => id)
-                      .join(", ")}
-                  </div>
-                ))}
-              </td>
-              <td>
-                {coursesByYearAndTerm(-1, "Summer").map((course, index) => (
-                  <div key={index} className="courseDetails">
-                    <h5>{course.course_code}</h5>
-                    {course.course_name} <br />
-                    Pre-requisite :{" "}
-                    {course.pre_requisite?.course_code
-                      .map((id) => id)
-                      .join(", ")}
-                  </div>
-                ))}
-              </td>
-              <td>
-                {coursesByYearAndTerm(-1, "Fall").map((course, index) => (
-                  <div key={index} className="courseDetails">
-                    <h5>{course.course_code}</h5>
-                    {course.course_name} <br />
-                    Pre-requisite :{" "}
-                    {course.pre_requisite?.course_code
-                      .map((id) => id)
-                      .join(", ")}
-                  </div>
-                ))}
-              </td>
-            </tr>
-            <tr>
-              <td>{startYear}</td>
-              <td>
-                {coursesByYearAndTerm(0, "Spring").map((course, index) => (
-                  <div key={index} className="courseDetails">
-                    <h5>{course.course_code}</h5>
-                    {course.course_name} <br />
-                    Pre-requisite :{" "}
-                    {course.pre_requisite?.course_code
-                      .map((id) => id)
-                      .join(", ")}
-                  </div>
-                ))}
-              </td>
-              <td>
-                {coursesByYearAndTerm(0, "Summer").map((course, index) => (
-                  <div key={index} className="courseDetails">
-                    <h5>{course.course_code}</h5>
-                    {course.course_name} <br />
-                    Pre-requisite :{" "}
-                    {course.pre_requisite?.course_code
-                      .map((id) => id)
-                      .join(", ")}
-                  </div>
-                ))}
-              </td>
-              <td>
-                {coursesByYearAndTerm(0, "Fall").map((course, index) => (
-                  <div key={index} className="courseDetails">
-                    <h5>{course.course_code}</h5>
-                    {course.course_name} <br />
-                    Pre-requisite :{" "}
-                    {course.pre_requisite?.course_code
-                      .map((id) => id)
-                      .join(", ")}
-                  </div>
-                ))}
-              </td>
-            </tr>
-          </tbody>
+          <tbody>{renderCourseDetails(coursesByTermAndYear())}</tbody>
         </table>
       </div>
 
@@ -140,47 +97,50 @@ const SelectedCoursesPage = () => {
           <PrintIcon />
         </IconButton>
       </div>
+
       <div className="container">
         <div className="yearsContainer">
-          {/* First Year Column */}
-          <div className="yearColumn">
-            <Typography variant="h4">First Year ({startYear - 1})</Typography>
-            {["Spring", "Summer", "Fall"].map((term) => (
-              <div key={term} className="termSection">
-                <h3>{term}</h3>
-                {coursesByYearAndTerm(-1, term).map((course) => (
-                  <div key={course._id} className="cardContainer">
-                    <CourseCard
-                      course={course}
-                      enableCheckbox={false}
-                      onCommentClick={handleCommentClick}
-                      addComment={true}
-                    />
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
+          {selectedCourses
+            .reduce((years, course) => {
+              const { year, term } = course.selected_term;
+              const existingYear = years.find((item) => item.year === year);
 
-          {/* Second Year Column */}
-          <div className="yearColumn">
-            <Typography variant="h4">Second Year ({startYear})</Typography>
-            {["Spring", "Summer", "Fall"].map((term) => (
-              <div key={term} className="termSection">
-                <h3>{term}</h3>
-                {coursesByYearAndTerm(0, term).map((course) => (
-                  <div key={course._id} className="cardContainer">
-                    <CourseCard
-                      course={course}
-                      enableCheckbox={false}
-                      onCommentClick={handleCommentClick}
-                      addComment={true}
-                    />
-                  </div>
-                ))}
+              if (!existingYear) {
+                years.push({ year, terms: [term] });
+              } else if (!existingYear.terms.includes(term)) {
+                existingYear.terms.push(term);
+              }
+
+              return years;
+            }, [])
+            .map((yearObj) => (
+              <div key={yearObj.year} className="yearColumn">
+                <Typography variant="h4">{`Year ${yearObj.year}`}</Typography>
+                <div className="termSection">
+                  {yearObj.terms.map((term) => (
+                    <div key={`${yearObj.year}-${term}`} className="termRow">
+                      <h3>{toSentenceCase(term)}</h3>
+                      {selectedCourses
+                        .filter(
+                          (course) =>
+                            course.selected_term.year === yearObj.year &&
+                            course.selected_term.term === term
+                        )
+                        .map((course) => (
+                          <div key={course._id} className="cardContainer">
+                            <CourseCard
+                              course={course}
+                              enableCheckbox={false}
+                              onCommentClick={handleCommentClick}
+                              addComment={true}
+                            />
+                          </div>
+                        ))}
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
-          </div>
         </div>
       </div>
     </>

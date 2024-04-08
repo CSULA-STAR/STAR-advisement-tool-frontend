@@ -2,7 +2,7 @@ import { Box, Button, Grid, Stack, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import CourseCard from "../../components/CourseCard";
-import { getNextTerm, getTermLabel } from "../../utils";
+import { getNextTerm, getTermLabel, toSentenceCase } from "../../utils";
 import React from "react";
 import "../../pages/CourseSelection/courseSelectionStyle.css";
 import BlockModal from "../../components/BlockModal/BlockModal";
@@ -39,15 +39,24 @@ export const CourseSelection = () => {
   const navigate = useNavigate();
   const [navigationCount, setNavigationCount] = useState(0);
   const location = useLocation();
-  const { courseList, term } = location.state || {};
-  let startYear = location.state.startYear;
-
+  const { courseList, startTerm, startYear, term } = location.state || {};
+  console.log("startYearstartYear", startYear);
   //modal Changes
   const [genEduCourse, setGenEduCourse] = useState([]);
+  const [currentTerm, setCurrentTerm] = useState(term.term);
+  const [currentYear, setCurrentYear] = useState(term.year);
+
+  // useEffect(() => {
+  //   console.log("startTerm", startTerm, currentTerm);
+  //   setCurrentTerm(currentTerm ? getNextTerm(currentTerm) : startTerm);
+  //   setCurrentYear(currentYear?.value === "spring" ? startYear + 1 : startYear);
+  // }, []);
 
   useEffect(() => {
+    console.log("currentYear", startYear, currentYear, currentTerm);
     const termCourseList = courseList.filter((course) => {
-      return course.term.includes(getTermLabel(term));
+      console.log("course.term.", currentTerm);
+      return course.term.includes(toSentenceCase(currentTerm));
     });
 
     const genEdu = courseList.filter((course) => {
@@ -58,13 +67,16 @@ export const CourseSelection = () => {
 
     setData(termCourseList);
     console.log("Data : ", termCourseList);
-  }, [courseList, term]);
+  }, [courseList, currentTerm]);
 
   const handleCheckboxChange = (courseId, isChecked) => {
     setCheckboxResponses({ ...checkboxResponses, [courseId]: isChecked });
   };
 
   const handleNextClick = () => {
+    console.log("startTerm", startTerm, currentTerm);
+    setCurrentTerm(getNextTerm(currentTerm));
+    setCurrentYear(currentTerm === "fall" ? currentYear + 1 : currentYear);
     let checkedCourses = courseList.filter(
       (course) => checkboxResponses[course._id]
     );
@@ -85,13 +97,13 @@ export const CourseSelection = () => {
       });
     });
 
-    console.log("existingCourses>>>>>>", existingCourses);
-
     checkedCourses = checkedCourses.map((course) => ({
       ...course,
-      selected_term: term,
+      selected_term: { term: currentTerm, year: currentYear },
       startYear: startYear,
     }));
+
+    console.log("checkedCourses>>>>>>", checkedCourses);
 
     let newCourses = [...existingCourses, ...checkedCourses];
 
@@ -102,21 +114,33 @@ export const CourseSelection = () => {
       (course) => !checkboxResponses[course._id]
     );
     if (navigationCount < 5) {
-      startYear = navigationCount === 2 ? startYear + 1 : startYear;
-      console.log("startyeaInselection" + startYear);
       navigate("/course-selection", {
         state: {
           courseList: filteredCourseList,
-          term: getNextTerm(term),
+          term: { term: currentTerm, year: currentYear },
+          startTerm,
           startYear,
         },
       });
+      // if (navigationCount < 5) {
+      //   startYear = navigationCount === 2 ? startYear + 1 : startYear;
+      //   console.log("startyeaInselection" + startYear);
+      //   navigate("/course-selection", {
+      //     state: {
+      //       courseList: filteredCourseList,
+      //       term: getNextTerm(term),
+      //       startYear,
+      //     },
+      //   });
       setNavigationCount(navigationCount + 1);
     } else {
       navigate("/selected-courses", {
         state: {
           courseList: filteredCourseList,
+          startTerm,
           startYear,
+          endTerm: currentTerm,
+          endYear: currentYear,
         },
       });
     }
@@ -131,7 +155,7 @@ export const CourseSelection = () => {
         padding={3}
       >
         <Typography variant="h4" component="div">
-          {getTermLabel(term)} {startYear}
+          {getTermLabel(currentTerm)} {currentYear}
         </Typography>
         <Box>
           <Button variant="contained" onClick={handleNextClick}>

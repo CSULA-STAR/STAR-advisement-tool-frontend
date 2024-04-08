@@ -58,3 +58,27 @@
     display: none;
   }
 }
+
+.container {
+  margin: 20px;
+}
+
+.coursesTable {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.coursesTable th,
+.coursesTable td {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+.coursesTable th {
+  background-color: #f2f2f2;
+}
+
+.coursesTable tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}

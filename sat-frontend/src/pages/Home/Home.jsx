@@ -29,12 +29,17 @@ const Home = () => {
     setSelectedProgram(selectedProgram.value);
   };
 
+  const filteredTerms = TERMS.filter(
+    (term) => term.value === "fall" || term.value === "spring"
+  );
+
   const handleTermChange = (term) => {
     setSelectedTerm(term);
   };
 
   const handleStartYearChange = (year) => {
     setStartYear(year);
+    console.log("yearr", year);
   };
 
   const handleSubmit = () => {
@@ -47,8 +52,8 @@ const Home = () => {
       state: {
         program: selectedProgram,
         college: college,
-        term: selectedTerm,
-        startyear: startYear,
+        startTerm: selectedTerm,
+        startYear,
       },
     });
   };
@@ -125,7 +130,7 @@ const Home = () => {
         {selectedProgram && (
           <SelectionDropdown
             label="Start Term"
-            options={TERMS}
+            options={filteredTerms}
             value={selectedTerm}
             onChange={handleTermChange}
           />

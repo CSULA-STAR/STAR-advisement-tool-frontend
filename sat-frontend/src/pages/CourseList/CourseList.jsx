@@ -18,15 +18,14 @@ const CourseList = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const { program, college, term } = location.state;
+  const { program, college, startTerm, startYear } = location.state;
   const [matchedCourses, setMatchedCourses] = useState([]);
   const [csulaCourseList, setCsulaCourseList] = useState([]);
   const [remainingCsulaCourses, setRemainingCsulaCourses] = useState([]);
   const [checkboxResponses, setCheckboxResponses] = useState({});
   const [course_types, setCourseTypes] = useState([]);
 
-  console.log("Location", program, college, term);
-  const startYear = location.state.startyear;
+  console.log("Location", program, college, startTerm, startYear);
   useEffect(() => {
     if (location.state) {
       console.log("CourseListYear:", startYear);
@@ -115,10 +114,11 @@ const CourseList = () => {
 
     navigate("/course-selection", {
       state: {
-        program: program,
-        term: term.value,
+        program,
+        startTerm,
         courseList: uncheckedCourses,
         startYear: startYear.value,
+        term: { term: startTerm.value, year: startYear.value },
       },
     });
   };
