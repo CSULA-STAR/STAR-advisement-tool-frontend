@@ -21,17 +21,12 @@ const CourseList = () => {
   const { program, college, startTerm, startYear } = location.state;
   const [matchedCourses, setMatchedCourses] = useState([]);
   const [csulaCourseList, setCsulaCourseList] = useState([]);
-  const [remainingCsulaCourses, setRemainingCsulaCourses] = useState([]);
   const [checkboxResponses, setCheckboxResponses] = useState({});
   const [course_types, setCourseTypes] = useState([]);
 
   console.log("Location", program, college, startTerm, startYear);
   useEffect(() => {
-    if (location.state) {
-      console.log("CourseListYear:", startYear);
-    } else {
-      console.log("Location state is not available.");
-    }
+    localStorage.removeItem("selectedCourses");
   }, [location.state]);
 
   useEffect(() => {
@@ -62,8 +57,6 @@ const CourseList = () => {
             selectedSchoolResponse.data
           );
           setMatchedCourses(matched);
-          setRemainingCsulaCourses(remainingCsula);
-
           const initialCheckboxResponses = {};
           matched.forEach(({ csulaCourse }) => {
             initialCheckboxResponses[csulaCourse._id] = false;
@@ -95,8 +88,10 @@ const CourseList = () => {
   };
 
   const handleCheckboxChange = (courseId, isChecked) => {
-    console.log("courseId", courseId, isChecked);
-    setCheckboxResponses({ ...checkboxResponses, [courseId]: isChecked });
+    setCheckboxResponses((prevState) => ({
+      ...prevState,
+      [courseId]: isChecked,
+    }));
   };
 
   const goToSelectedCoursesPage = () => {
@@ -104,13 +99,21 @@ const CourseList = () => {
       (course) => checkboxResponses[course._id]
     );
 
+    const selectedCoursesWithTerm = selectedCourses.map((course) => ({
+      ...course,
+      selected_term: {},
+    }));
+
     const uncheckedCourses = csulaCourseList.filter(
       (course) => !checkboxResponses[course._id]
     );
 
-    console.log("Selected courses for localStorage ", selectedCourses);
+    console.log("Selected courses for localStorage ", selectedCoursesWithTerm);
 
-    localStorage.setItem("selectedCourses", JSON.stringify(selectedCourses));
+    localStorage.setItem(
+      "selectedCourses",
+      JSON.stringify(selectedCoursesWithTerm)
+    );
 
     navigate("/course-selection", {
       state: {
@@ -118,7 +121,6 @@ const CourseList = () => {
         startTerm,
         courseList: uncheckedCourses,
         startYear: startYear.value,
-        term: { term: startTerm.value, year: startYear.value },
       },
     });
   };
@@ -245,7 +247,11 @@ const CourseList = () => {
           </div>
         ) : null;
       })}
-      <button onClick={goToSelectedCoursesPage}>View Selected Courses</button>
+      <div className="floating-button">
+        <Button variant="contained" onClick={goToSelectedCoursesPage}>
+          View Selected Courses
+        </Button>
+      </div>
     </div>
   );
 };

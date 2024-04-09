@@ -8,8 +8,6 @@ import { Typography } from "@mui/material";
 import { toSentenceCase } from "../../utils";
 
 const SelectedCoursesPage = () => {
-  const location = useLocation();
-  const { courseList } = location.state || {};
   const [selectedCourses, setSelectedCourses] = useState([]);
 
   useEffect(() => {
@@ -23,21 +21,23 @@ const SelectedCoursesPage = () => {
   const handlePrintScreen = () => {
     window.print();
   };
+
   const coursesByTermAndYear = () => {
     const courses = {};
     selectedCourses.forEach((course) => {
-      const { term, year } = course.selected_term;
-      if (!courses[year]) {
-        courses[year] = {};
+      if (course?.selected_term) {
+        const { term, year } = course.selected_term;
+        if (!courses[year]) {
+          courses[year] = {};
+        }
+        if (!courses[year][term]) {
+          courses[year][term] = [];
+        }
+        courses[year][term].push(course);
       }
-      if (!courses[year][term]) {
-        courses[year][term] = [];
-      }
-      courses[year][term].push(course);
     });
     return courses;
   };
-
   const renderCourseDetails = (courses) => {
     const rows = [];
     Object.keys(courses).forEach((year) => {
@@ -102,15 +102,18 @@ const SelectedCoursesPage = () => {
         <div className="yearsContainer">
           {selectedCourses
             .reduce((years, course) => {
-              const { year, term } = course.selected_term;
-              const existingYear = years.find((item) => item.year === year);
+              const selectedTerm = course.selected_term || {};
+              const { year, term } = selectedTerm;
+              if (year && term) {
+                // Check if both year and term are defined and not empty
+                const existingYear = years.find((item) => item.year === year);
 
-              if (!existingYear) {
-                years.push({ year, terms: [term] });
-              } else if (!existingYear.terms.includes(term)) {
-                existingYear.terms.push(term);
+                if (!existingYear) {
+                  years.push({ year, terms: [term] });
+                } else if (!existingYear.terms.includes(term)) {
+                  existingYear.terms.push(term);
+                }
               }
-
               return years;
             }, [])
             .map((yearObj) => (
@@ -123,8 +126,9 @@ const SelectedCoursesPage = () => {
                       {selectedCourses
                         .filter(
                           (course) =>
-                            course.selected_term.year === yearObj.year &&
-                            course.selected_term.term === term
+                            (course.selected_term?.year || "") ===
+                              yearObj.year &&
+                            (course.selected_term?.term || "") === term
                         )
                         .map((course) => (
                           <div key={course._id} className="cardContainer">
