@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import CourseCard from "../../components/CourseCard";
 import { getNextTerm, getTermLabel, toSentenceCase } from "../../utils";
-import React from "react";
 import "../../pages/CourseSelection/courseSelectionStyle.css";
 import BlockModal from "../../components/BlockModal/BlockModal";
 import Badge from "@mui/material/Badge";
 import DoneOutlinedIcon from "@mui/icons-material/DoneOutlined";
+
 export const CourseSelection = () => {
   const course_types = [
     "upper_division",
@@ -16,6 +16,7 @@ export const CourseSelection = () => {
     "senior_design",
     "technical_elective",
   ];
+
   const blocks = [
     "block_c",
     "block_d",
@@ -34,68 +35,48 @@ export const CourseSelection = () => {
     technical_elective: " Technical Elective",
   };
 
-  const [data, setData] = useState([]);
+  const location = useLocation();
+  const [termData, setTermData] = useState([]);
+  const [courseListData, setCourseListData] = useState([]);
   const [checkboxResponses, setCheckboxResponses] = useState({});
   const navigate = useNavigate();
   const [navigationCount, setNavigationCount] = useState(0);
-  const location = useLocation();
-  const { courseList, startTerm, startYear, term } = location.state || {};
-  console.log("startYearstartYear", startYear);
-  //modal Changes
+  const { courseList, startTerm, startYear } = location.state || {};
   const [genEduCourse, setGenEduCourse] = useState([]);
-  const [currentTerm, setCurrentTerm] = useState(term.term);
-  const [currentYear, setCurrentYear] = useState(term.year);
-
-  // useEffect(() => {
-  //   console.log("startTerm", startTerm, currentTerm);
-  //   setCurrentTerm(currentTerm ? getNextTerm(currentTerm) : startTerm);
-  //   setCurrentYear(currentYear?.value === "spring" ? startYear + 1 : startYear);
-  // }, []);
+  const [currentTerm, setCurrentTerm] = useState(startTerm.value);
+  const [currentYear, setCurrentYear] = useState(startYear);
 
   useEffect(() => {
-    console.log("currentYear", startYear, currentYear, currentTerm);
-    const termCourseList = courseList.filter((course) => {
-      console.log("course.term.", currentTerm);
+    setCourseListData(courseList);
+  }, []);
+
+  useEffect(() => {
+    const termCourseList = courseListData.filter((course) => {
       return course.term.includes(toSentenceCase(currentTerm));
     });
 
-    const genEdu = courseList.filter((course) => {
+    const genEdu = courseListData.filter((course) => {
       return course.course_type === "general_education";
     });
 
     setGenEduCourse(genEdu);
-
-    setData(termCourseList);
-    console.log("Data : ", termCourseList);
-  }, [courseList, currentTerm]);
+    setTermData(termCourseList);
+  }, [courseListData, currentTerm]);
 
   const handleCheckboxChange = (courseId, isChecked) => {
     setCheckboxResponses({ ...checkboxResponses, [courseId]: isChecked });
   };
 
-  const handleNextClick = () => {
-    console.log("startTerm", startTerm, currentTerm);
+  const handleNextClick = async () => {
     setCurrentTerm(getNextTerm(currentTerm));
     setCurrentYear(currentTerm === "fall" ? currentYear + 1 : currentYear);
-    let checkedCourses = courseList.filter(
+
+    let checkedCourses = courseListData.filter(
       (course) => checkboxResponses[course._id]
     );
+
     let existingCourses = localStorage.getItem("selectedCourses");
     existingCourses = existingCourses ? JSON.parse(existingCourses) : [];
-
-    // Include prerequisites of checked courses in localStorage
-    checkedCourses.forEach((course) => {
-      course.pre_requisite.course_code.forEach((prerequisite) => {
-        if (!existingCourses.some((c) => c._id === prerequisite)) {
-          const prerequisiteCourse = courseList.find(
-            (c) => c._id === prerequisite
-          );
-          if (prerequisiteCourse) {
-            existingCourses.push(prerequisiteCourse);
-          }
-        }
-      });
-    });
 
     checkedCourses = checkedCourses.map((course) => ({
       ...course,
@@ -103,40 +84,27 @@ export const CourseSelection = () => {
       startYear: startYear,
     }));
 
-    console.log("checkedCourses>>>>>>", checkedCourses);
-
     let newCourses = [...existingCourses, ...checkedCourses];
+    console.log("newCourses", existingCourses, newCourses, checkedCourses);
 
     localStorage.setItem("selectedCourses", JSON.stringify(newCourses));
-
-    console.log(localStorage.getItem("selectedCourses"));
-    const filteredCourseList = courseList.filter(
+    const updatedCourseList = courseListData.filter(
       (course) => !checkboxResponses[course._id]
     );
-    if (navigationCount < 5) {
-      navigate("/course-selection", {
-        state: {
-          courseList: filteredCourseList,
-          term: { term: currentTerm, year: currentYear },
-          startTerm,
-          startYear,
-        },
-      });
-      // if (navigationCount < 5) {
-      //   startYear = navigationCount === 2 ? startYear + 1 : startYear;
-      //   console.log("startyeaInselection" + startYear);
-      //   navigate("/course-selection", {
-      //     state: {
-      //       courseList: filteredCourseList,
-      //       term: getNextTerm(term),
-      //       startYear,
-      //     },
-      //   });
+    setCourseListData(updatedCourseList);
+
+    const updatedTermData = termData.filter(
+      (course) => !checkboxResponses[course._id]
+    );
+    setTermData(updatedTermData);
+
+    if (navigationCount < 5 && location.pathname !== "/selected-courses") {
       setNavigationCount(navigationCount + 1);
-    } else {
+    } else if (navigationCount >= 5) {
+      console.log("final course listClasses", updatedCourseList);
       navigate("/selected-courses", {
         state: {
-          courseList: filteredCourseList,
+          courseList: updatedCourseList,
           startTerm,
           startYear,
           endTerm: currentTerm,
@@ -170,7 +138,7 @@ export const CourseSelection = () => {
 
             let coursesForType = isGeneralEducation
               ? genEduCourse
-              : data.filter((course) => course.course_type === header);
+              : termData.filter((course) => course.course_type === header);
 
             const coursesToShow = isGeneralEducation
               ? blocks
