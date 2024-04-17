@@ -25,7 +25,6 @@ const Home = () => {
   };
 
   const handleProgramChange = (selectedProgram) => {
-    console.log("selectedProgram", selectedProgram);
     setSelectedProgram(selectedProgram.value);
   };
 
