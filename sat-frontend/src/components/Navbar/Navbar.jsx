@@ -6,7 +6,7 @@ const Navbar = () => {
     <header className="header">
       <nav className="nav container">
         <NavLink to="/" className="nav__logo">
-          ECST
+          SAT
         </NavLink>
 
         <div className={"nav__menu"} id="nav-menu">
@@ -17,16 +17,16 @@ const Navbar = () => {
               </NavLink>
             </li>
 
-            <li className="nav__item">
+            {/* <li className="nav__item">
               <NavLink to="/nav1" className="nav__link">
                 Nav 1
               </NavLink>
-            </li>
-            <li className="nav__item">
+            </li> */}
+            {/* <li className="nav__item">
               <NavLink to="/login" className="nav__link nav__cta">
                 Login
               </NavLink>
-            </li>
+            </li> */}
           </ul>
           <div className="nav__close" id="nav-close">
             {/* <IoClose /> */}

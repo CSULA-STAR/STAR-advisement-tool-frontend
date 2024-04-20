@@ -1,5 +1,7 @@
-import Checkbox from "@material-ui/core/Checkbox";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
+import { useState } from "react";
+import PropTypes from "prop-types";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import {
   Box,
   Card,
@@ -10,10 +12,8 @@ import {
   Tooltip,
   Link,
 } from "@mui/material";
-import PropTypes from "prop-types";
-import { useState } from "react";
 import CustomModal from "../Modal";
-import "./style.css";
+import "./courseCardStyle.css";
 
 const CourseCard = ({
   enableCheckbox,
@@ -70,13 +70,11 @@ const CourseCard = ({
     <>
       {!compactView ? (
         <Card
-          // variant="outlined"
           onMouseEnter={hoverable && handleMouseEnter}
           onMouseLeave={hoverable && handleMouseLeave}
           onClick={onClick}
-          sx={{ maxWidth: 360 }}
+          sx={{ maxWidth: 360, marginBottom: "10px" }}
           style={{
-            marginBottom: "10px",
             backgroundColor: requsiteRequired ? "#a4a7b0" : "#e3e2e7",
           }}
         >
@@ -88,26 +86,18 @@ const CourseCard = ({
             >
               <Stack direction="row" alignItems="center">
                 {enableCheckbox && (
-                  <Typography gutterBottom>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          color="primary"
-                          checked={isChecked}
-                          onChange={handleCheckboxChange}
-                          gutterBottom
-                        />
-                      }
-                    />
-                  </Typography>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        color="primary"
+                        checked={isChecked}
+                        onChange={handleCheckboxChange}
+                      />
+                    }
+                  />
                 )}
                 {course_code?.map((code, index) => (
-                  <Typography
-                    gutterBottom
-                    variant="h6"
-                    key={index}
-                    component="div"
-                  >
+                  <Typography variant="h6" key={index} component="div">
                     <strong>
                       {code}
                       {index < course_code.length - 1 ? "/ " : ""}
@@ -115,7 +105,7 @@ const CourseCard = ({
                   </Typography>
                 ))}
               </Stack>
-              <Typography gutterBottom variant="h6" component="div">
+              <Typography variant="h6" component="div">
                 {credits}
               </Typography>
             </Stack>
@@ -125,7 +115,7 @@ const CourseCard = ({
                 <Typography
                   color="text.secondary"
                   variant="body2"
-                  style={{
+                  sx={{
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
@@ -134,12 +124,11 @@ const CourseCard = ({
                   {course_name}
                 </Typography>
               </Tooltip>
-              <Box style={{ display: "flex", justifyContent: "end" }}>
+              <Box sx={{ display: "flex", justifyContent: "end" }}>
                 {addComment ? (
-                  // Use Link component instead of Button
                   <Link
                     onClick={handleModalOpen}
-                    style={{
+                    sx={{
                       textDecoration: "none",
                       marginTop: "10px",
                       cursor: "pointer",
@@ -165,12 +154,11 @@ const CourseCard = ({
                     {pre_requisite?.course_code.length ? (
                       <>
                         <Typography variant="body2">Pre-requisites:</Typography>
-
                         <Tooltip title={pre_requisite?.description}>
                           <Typography
-                            gutterBottom
                             variant="body2"
-                            style={
+                            gutterBottom
+                            sx={
                               requsiteRequired
                                 ? {
                                     color: "red",
@@ -189,9 +177,8 @@ const CourseCard = ({
                     {co_requisite?.course_code.length ? (
                       <>
                         <Typography variant="body2">Co-requsites:</Typography>
-
                         <Tooltip title={co_requisite?.description}>
-                          <Typography gutterBottom variant="body2">
+                          <Typography variant="body2" gutterBottom>
                             {co_requisite?.course_code?.join(", ")}
                           </Typography>
                         </Tooltip>
@@ -218,61 +205,62 @@ const CourseCard = ({
           ) : null}
         </Card>
       ) : (
-        <>
-          <Card
-            onClick={onClick}
-            sx={{ maxWidth: 360 }}
-            style={{ marginBottom: "10px", backgroundColor: "#e3e2e7" }}
-          >
-            <Box sx={{ p: 1.2 }}>
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Stack direction="row" alignItems="center">
-                  {enableCheckbox && (
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          color="primary"
-                          checked={isChecked}
-                          onChange={handleCheckboxChange}
-                        />
-                      }
-                    />
-                  )}
-                  {course_code?.map((code, index) => (
-                    <Typography variant="subtitle2" key={index} component="div">
-                      <strong>
-                        {code}
-                        {index < course_code.length - 1 ? "/ " : ""}
-                      </strong>
-                    </Typography>
-                  ))}
-                </Stack>
-                <Typography variant="subtitle2" component="div">
-                  {credits}
-                </Typography>
-              </Stack>
-              <Stack>
-                <Tooltip title={course_name}>
-                  <Typography
-                    color="text.secondary"
-                    variant="body2"
-                    style={{
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {course_name}
+        <Card
+          onClick={onClick}
+          sx={{
+            maxWidth: 360,
+            marginBottom: "10px",
+            backgroundColor: "#e3e2e7",
+          }}
+        >
+          <Box sx={{ p: 1.2 }}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Stack direction="row" alignItems="center">
+                {enableCheckbox && (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        color="primary"
+                        checked={isChecked}
+                        onChange={handleCheckboxChange}
+                      />
+                    }
+                  />
+                )}
+                {course_code?.map((code, index) => (
+                  <Typography variant="subtitle2" key={index} component="div">
+                    <strong>
+                      {code}
+                      {index < course_code.length - 1 ? "/ " : ""}
+                    </strong>
                   </Typography>
-                </Tooltip>
+                ))}
               </Stack>
-            </Box>
-          </Card>
-        </>
+              <Typography variant="subtitle2" component="div">
+                {credits}
+              </Typography>
+            </Stack>
+            <Stack>
+              <Tooltip title={course_name}>
+                <Typography
+                  color="text.secondary"
+                  variant="body2"
+                  sx={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {course_name}
+                </Typography>
+              </Tooltip>
+            </Stack>
+          </Box>
+        </Card>
       )}
       {isBlock ? null : null}
     </>

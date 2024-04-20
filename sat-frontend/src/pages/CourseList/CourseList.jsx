@@ -2,10 +2,12 @@ import ForwardRoundedIcon from "@mui/icons-material/ForwardRounded";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import CourseCard from "../../components/CourseCard";
+import CourseCard from "../../components/CourseCard/CourseCard";
 import "./CourseListStyle.css";
 import { Button } from "@material-ui/core";
 import { blocks, block_types } from "../../constants";
+import { useDispatch } from "react-redux";
+import { addCourse, reset } from "../../slices/selectedCourseSlice";
 
 const CourseList = () => {
   const types = {
@@ -13,21 +15,21 @@ const CourseList = () => {
     lower_division: "Lower Division",
     general_education: "General Education",
     senior_design: "Senior Design",
-    technical_elective: " Technical Elective",
+    technical_elective: "Technical Elective",
   };
 
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
   const { program, college, startTerm, startYear } = location.state;
   const [matchedCourses, setMatchedCourses] = useState([]);
   const [csulaCourseList, setCsulaCourseList] = useState([]);
   const [checkboxResponses, setCheckboxResponses] = useState({});
   const [course_types, setCourseTypes] = useState([]);
 
-  console.log("Location", program, college, startTerm, startYear);
   useEffect(() => {
-    localStorage.removeItem("selectedCourses");
-  }, [location.state]);
+    dispatch(reset());
+  }, [dispatch]);
 
   useEffect(() => {
     if (program && college) {
@@ -36,23 +38,18 @@ const CourseList = () => {
           const csulaResponse = await axios.get(
             `http://localhost:3001/fetch-all-csula-courses?dept=${program.department}`
           );
-          console.log("csulaResponse", csulaResponse.data);
           let filteredCourses = csulaResponse.data.filter((course) => course);
-          console.log("-->filteredCourses", filteredCourses);
           setCsulaCourseList(filteredCourses);
           const selectedSchoolResponse = await axios.get(
             `http://localhost:3001/fetch-courses?sid=${college.id}`
           );
-          console.log("-->27", selectedSchoolResponse.data);
-
           const typesResponse = await axios.get(
             `http://localhost:3001/course-types`
           );
 
           const idsArray = typesResponse.data[0].types.map((type) => type.id);
-          console.log("Types Name : ", idsArray);
           setCourseTypes(idsArray);
-          const { matched, remainingCsula } = findMatchingCourses(
+          const { matched } = findMatchingCourses(
             csulaResponse.data,
             selectedSchoolResponse.data
           );
@@ -107,13 +104,8 @@ const CourseList = () => {
     const uncheckedCourses = csulaCourseList.filter(
       (course) => !checkboxResponses[course._id]
     );
-
-    console.log("Selected courses for localStorage ", selectedCoursesWithTerm);
-
-    localStorage.setItem(
-      "selectedCourses",
-      JSON.stringify(selectedCoursesWithTerm)
-    );
+    console.log("precheck", selectedCoursesWithTerm);
+    dispatch(addCourse(selectedCoursesWithTerm));
 
     navigate("/course-selection", {
       state: {
@@ -128,9 +120,6 @@ const CourseList = () => {
   if (!program || !college) {
     return <div>Error: Missing program or college props</div>;
   }
-
-  console.log("csulaCourseList", csulaCourseList);
-  console.log("matchedCourses", matchedCourses);
 
   let selectedSchoolHeadingRendered = false;
   let csulaHeadingRendered = false;

@@ -1,17 +1,18 @@
-import { useLocation } from "react-router-dom";
-import CourseCard from "../../components/CourseCard";
-import { useState, useEffect } from "react";
-import "./style.css";
-import IconButton from "@mui/material/IconButton";
 import PrintIcon from "@mui/icons-material/Print";
 import { Typography } from "@mui/material";
+import IconButton from "@mui/material/IconButton";
+import { useEffect, useState } from "react";
+import CourseCard from "../../components/CourseCard/CourseCard";
 import { toSentenceCase } from "../../utils";
+import "./selectedCoursesStyle.css";
+import { useSelector } from "react-redux";
 
 const SelectedCoursesPage = () => {
   const [selectedCourses, setSelectedCourses] = useState([]);
+  const Courses = useSelector((state) => state);
 
   useEffect(() => {
-    setSelectedCourses(JSON.parse(localStorage.getItem("selectedCourses")));
+    setSelectedCourses(Courses);
   }, []);
 
   const handleCommentClick = (course) => {

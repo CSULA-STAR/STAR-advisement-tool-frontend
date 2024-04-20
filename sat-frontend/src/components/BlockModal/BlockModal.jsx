@@ -4,7 +4,7 @@ import Modal from "@mui/material/Modal";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import { Paper } from "@mui/material";
-import CourseCard from "../../components/CourseCard/index";
+import CourseCard from "../CourseCard/CourseCard";
 import CloseIcon from "@mui/icons-material/Close";
 
 const style = {

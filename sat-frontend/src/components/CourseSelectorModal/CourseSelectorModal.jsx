@@ -1,16 +1,17 @@
 import { Modal, Box, Typography, Paper, Button } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CourseCard from "../CourseCard";
-import { useState } from "react";
+import PropTypes from "prop-types";
 
 const CourseSelectorModal = ({
   openModal,
   handleModalClose,
-  handleCommentClick,
+  // handleCommentClick,
   courses,
 }) => {
   const handleCheckboxChange = () => {};
   const handleSubmitClick = () => {};
+
   return (
     <Modal
       open={openModal}
@@ -56,7 +57,6 @@ const CourseSelectorModal = ({
                 }
               />
             ))}
-
             <Button variant="contained" onClick={handleSubmitClick}>
               Submit
             </Button>
@@ -65,6 +65,35 @@ const CourseSelectorModal = ({
       </Box>
     </Modal>
   );
+};
+
+CourseSelectorModal.propTypes = {
+  openModal: PropTypes.bool.isRequired,
+  handleModalClose: PropTypes.func.isRequired,
+  handleCommentClick: PropTypes.func.isRequired,
+  courses: PropTypes.arrayOf(
+    PropTypes.shape({
+      _id: PropTypes.number.isRequired,
+      course_name: PropTypes.string.isRequired,
+      course_code: PropTypes.array.isRequired,
+      credits: PropTypes.number.isRequired,
+      department: PropTypes.arrayOf(
+        PropTypes.shape({
+          id: PropTypes.number.isRequired,
+          name: PropTypes.string.isRequired,
+        })
+      ).isRequired,
+      pre_requisite: PropTypes.shape({
+        description: PropTypes.string,
+        course_code: PropTypes.array,
+      }),
+      co_requisite: PropTypes.shape({
+        description: PropTypes.string,
+        course_code: PropTypes.array,
+      }),
+      term: PropTypes.array,
+    })
+  ).isRequired,
 };
 
 export default CourseSelectorModal;

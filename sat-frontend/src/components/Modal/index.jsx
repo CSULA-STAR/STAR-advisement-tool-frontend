@@ -6,6 +6,7 @@ import {
   Button,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import PropTypes from "prop-types";
 
 const CustomModal = ({
   openModal,
@@ -54,6 +55,13 @@ const CustomModal = ({
       </div>
     </Modal>
   );
+};
+
+CustomModal.propTypes = {
+  openModal: PropTypes.bool.isRequired,
+  handleModalClose: PropTypes.func.isRequired,
+  handleCommentClick: PropTypes.func.isRequired,
+  fullSize: PropTypes.bool,
 };
 
 export default CustomModal;

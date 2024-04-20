@@ -1,21 +1,31 @@
 import { Box, Button, Grid, Stack, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import CourseCard from "../../components/CourseCard";
+import { useSelector, useDispatch } from "react-redux";
+import CourseCard from "../../components/CourseCard/CourseCard";
 import { getNextTerm, getTermLabel, toSentenceCase } from "../../utils";
-import "../../pages/CourseSelection/courseSelectionStyle.css";
+import "./courseSelectionStyle.css";
 import BlockModal from "../../components/BlockModal/BlockModal";
 import Badge from "@mui/material/Badge";
 import DoneOutlinedIcon from "@mui/icons-material/DoneOutlined";
+import { addCourse } from "../../slices/selectedCourseSlice";
 
-export const CourseSelection = () => {
-  const course_types = [
+const CourseSelection = () => {
+  const courseTypes = [
     "upper_division",
     "lower_division",
     "general_education",
     "senior_design",
     "technical_elective",
   ];
+
+  const types = {
+    upper_division: "Upper Division",
+    lower_division: "Lower Division",
+    general_education: "General Education",
+    senior_design: "Senior Design",
+    technical_elective: "Technical Elective",
+  };
 
   const blocks = [
     "block_c",
@@ -27,19 +37,13 @@ export const CourseSelection = () => {
     "block_e",
   ];
 
-  const types = {
-    upper_division: "Upper Division",
-    lower_division: "Lower Division",
-    general_education: "General Education",
-    senior_design: "Senior Design",
-    technical_elective: " Technical Elective",
-  };
-
   const location = useLocation();
   const [termData, setTermData] = useState([]);
   const [courseListData, setCourseListData] = useState([]);
   const [checkboxResponses, setCheckboxResponses] = useState({});
   const navigate = useNavigate();
+  const exCourses = useSelector((state) => state);
+  const dispatch = useDispatch();
   const [navigationCount, setNavigationCount] = useState(0);
   const { courseList, startTerm, startYear } = location.state || {};
   const [genEduCourse, setGenEduCourse] = useState([]);
@@ -48,16 +52,16 @@ export const CourseSelection = () => {
 
   useEffect(() => {
     setCourseListData(courseList);
-  }, []);
+  }, [courseList]);
 
   useEffect(() => {
-    const termCourseList = courseListData.filter((course) => {
-      return course.term.includes(toSentenceCase(currentTerm));
-    });
+    const termCourseList = courseListData.filter((course) =>
+      course.term.includes(toSentenceCase(currentTerm))
+    );
 
-    const genEdu = courseListData.filter((course) => {
-      return course.course_type === "general_education";
-    });
+    const genEdu = courseListData.filter(
+      (course) => course.course_type === "general_education"
+    );
 
     setGenEduCourse(genEdu);
     setTermData(termCourseList);
@@ -74,9 +78,9 @@ export const CourseSelection = () => {
     let checkedCourses = courseListData.filter(
       (course) => checkboxResponses[course._id]
     );
-
-    let existingCourses = localStorage.getItem("selectedCourses");
-    existingCourses = existingCourses ? JSON.parse(existingCourses) : [];
+    const uncheckedCourses = courseListData.filter(
+      (course) => !checkboxResponses[course._id]
+    );
 
     checkedCourses = checkedCourses.map((course) => ({
       ...course,
@@ -84,14 +88,9 @@ export const CourseSelection = () => {
       startYear: startYear,
     }));
 
-    let newCourses = [...existingCourses, ...checkedCourses];
-    console.log("newCourses", existingCourses, newCourses, checkedCourses);
+    dispatch(addCourse(checkedCourses));
 
-    localStorage.setItem("selectedCourses", JSON.stringify(newCourses));
-    const updatedCourseList = courseListData.filter(
-      (course) => !checkboxResponses[course._id]
-    );
-    setCourseListData(updatedCourseList);
+    setCourseListData(uncheckedCourses);
 
     const updatedTermData = termData.filter(
       (course) => !checkboxResponses[course._id]
@@ -101,10 +100,9 @@ export const CourseSelection = () => {
     if (navigationCount < 5 && location.pathname !== "/selected-courses") {
       setNavigationCount(navigationCount + 1);
     } else if (navigationCount >= 5) {
-      console.log("final course listClasses", updatedCourseList);
       navigate("/selected-courses", {
         state: {
-          courseList: updatedCourseList,
+          courseList: uncheckedCourses,
           startTerm,
           startYear,
           endTerm: currentTerm,
@@ -125,15 +123,13 @@ export const CourseSelection = () => {
         <Typography variant="h4" component="div">
           {getTermLabel(currentTerm)} {currentYear}
         </Typography>
-        <Box>
-          <Button variant="contained" onClick={handleNextClick}>
-            Next
-          </Button>
-        </Box>
+        <Button variant="contained" onClick={handleNextClick}>
+          Next
+        </Button>
       </Stack>
       <Box sx={{ padding: 3 }}>
         <Grid container spacing={2}>
-          {course_types.map((header) => {
+          {courseTypes.map((header) => {
             const isGeneralEducation = header === "general_education";
 
             let coursesForType = isGeneralEducation
@@ -197,14 +193,10 @@ export const CourseSelection = () => {
                           </Grid>
                         ))
                       : coursesToShow[0].courses.map((course) => {
-                          const selectedCourses = JSON.parse(
-                            localStorage.getItem("selectedCourses")
-                          );
-
                           const prerequisitesPresent =
                             course.pre_requisite.course_code.every(
                               (prerequisite) => {
-                                return selectedCourses.some((selectedCourse) =>
+                                return exCourses.some((selectedCourse) =>
                                   selectedCourse.course_code.includes(
                                     prerequisite
                                   )
