@@ -1,14 +1,61 @@
-import { Box, Button, Grid, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@mui/material";
+import {
+  MRT_GlobalFilterTextField,
+  MRT_TableBodyCellValue,
+  MRT_TablePagination,
+  MRT_ToolbarAlertBanner,
+  flexRender,
+  useMaterialReactTable,
+} from "material-react-table";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import CourseCard from "../../components/CourseCard/CourseCard";
-import { getNextTerm, getTermLabel, toSentenceCase } from "../../utils";
-import "./courseSelectionStyle.css";
-import BlockModal from "../../components/BlockModal/BlockModal";
-import Badge from "@mui/material/Badge";
-import DoneOutlinedIcon from "@mui/icons-material/DoneOutlined";
 import { addCourse } from "../../slices/selectedCourseSlice";
+import {
+  getNextTerm,
+  getTermLabel,
+  toSentenceCase,
+  abbreviateTerm,
+} from "../../utils";
+import "./courseSelectionStyle.css";
+// import { data } from "./makeData";
+import SideTable from "./SideTable";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
+
+const columns = [
+  {
+    accessorKey: "course_code",
+    header: "Course",
+  },
+  {
+    accessorKey: "course_name",
+    header: "Name",
+  },
+  {
+    accessorKey: "credits",
+    header: "Units",
+  },
+  {
+    accessorKey: "term",
+    header: "Offered in",
+  },
+  // {
+  //   accessorKey: "state",
+  //   header: "State",
+  // },
+];
 
 const CourseSelection = () => {
   const courseTypes = [
@@ -49,11 +96,16 @@ const CourseSelection = () => {
   const [genEduCourse, setGenEduCourse] = useState([]);
   const [currentTerm, setCurrentTerm] = useState(startTerm.value);
   const [currentYear, setCurrentYear] = useState(startYear);
-
+  const [showAllCourses, setShowAllCourses] = useState(false);
+  const [rowSelection, setRowSelection] = useState({});
   useEffect(() => {
     setCourseListData(courseList);
   }, [courseList]);
 
+  useEffect(() => {
+    console.info({ rowSelection }); //read your managed row selection state
+    // console.info(table.getState().rowSelection); //alternate way to get the row selection state
+  }, [rowSelection]);
   useEffect(() => {
     const termCourseList = courseListData.filter((course) =>
       course.term.includes(toSentenceCase(currentTerm))
@@ -71,31 +123,39 @@ const CourseSelection = () => {
     setCheckboxResponses({ ...checkboxResponses, [courseId]: isChecked });
   };
 
+  const handlePreviousClick = () => {};
+  const handleFinishClick = () => {};
+
   const handleNextClick = async () => {
     setCurrentTerm(getNextTerm(currentTerm));
     setCurrentYear(currentTerm === "fall" ? currentYear + 1 : currentYear);
 
-    let checkedCourses = courseListData.filter(
-      (course) => checkboxResponses[course._id]
+    const checkedCourseIds = Object.keys(rowSelection).filter(
+      (courseId) => rowSelection[courseId]
     );
-    const uncheckedCourses = courseListData.filter(
-      (course) => !checkboxResponses[course._id]
+    console.log("checkedCourseIds", checkedCourseIds);
+
+    const checkedCourses = termData.filter((course, index) =>
+      checkedCourseIds.includes(index.toString())
+    );
+    console.log("checkedCourses", checkedCourses);
+
+    const uncheckedCourses = termData.filter(
+      (course, index) => !checkedCourseIds.includes(index.toString())
     );
 
-    checkedCourses = checkedCourses.map((course) => ({
+    const updatedCheckedCourses = checkedCourses.map((course) => ({
       ...course,
       selected_term: { term: currentTerm, year: currentYear },
       startYear: startYear,
     }));
 
-    dispatch(addCourse(checkedCourses));
+    dispatch(addCourse(updatedCheckedCourses));
 
-    setCourseListData(uncheckedCourses);
+    setTermData(uncheckedCourses);
 
-    const updatedTermData = termData.filter(
-      (course) => !checkboxResponses[course._id]
-    );
-    setTermData(updatedTermData);
+    // Reset the rowSelection state
+    setRowSelection({});
 
     if (navigationCount < 5 && location.pathname !== "/selected-courses") {
       setNavigationCount(navigationCount + 1);
@@ -112,6 +172,32 @@ const CourseSelection = () => {
     }
   };
 
+  const handleRowSelectionChange = (selectedIndex, isChecked) => {
+    const courseId = termData[selectedIndex]._id;
+    setRowSelection((prevSelection) => ({
+      ...prevSelection,
+      [courseId]: isChecked,
+    }));
+  };
+
+  const table = useMaterialReactTable({
+    columns,
+    data: termData,
+    enableRowSelection: true,
+    getRowId: (row) => row._Id,
+    onRowSelectionChange: setRowSelection,
+    state: { rowSelection },
+    initialState: {
+      pagination: { pageSize: 5, pageIndex: 0 },
+      showGlobalFilter: true,
+    },
+    muiPaginationProps: {
+      rowsPerPageOptions: [5, 10, 15],
+      variant: "outlined",
+    },
+    paginationDisplayMode: "pages",
+  });
+
   return (
     <Box sx={{ textAlign: "center" }}>
       <Stack
@@ -120,120 +206,128 @@ const CourseSelection = () => {
         alignItems="center"
         padding={3}
       >
-        <Typography variant="h4" component="div">
-          {getTermLabel(currentTerm)} {currentYear}
-        </Typography>
-        <Button variant="contained" onClick={handleNextClick}>
-          Next
-        </Button>
+        <Box>
+          <Typography variant="h4" component="div">
+            {getTermLabel(currentTerm)} {currentYear}
+          </Typography>
+        </Box>
+        <Box>
+          <Button
+            variant="contained"
+            sx={{ marginRight: "10px" }}
+            onClick={handlePreviousClick}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="contained"
+            sx={{ marginRight: "10px" }}
+            onClick={handleNextClick}
+          >
+            Next
+          </Button>
+          <Button variant="contained" onClick={handleFinishClick}>
+            Finish
+          </Button>
+        </Box>
       </Stack>
-      <Box sx={{ padding: 3 }}>
-        <Grid container spacing={2}>
-          {courseTypes.map((header) => {
-            const isGeneralEducation = header === "general_education";
 
-            let coursesForType = isGeneralEducation
-              ? genEduCourse
-              : termData.filter((course) => course.course_type === header);
+      {/* *************TEST********************** */}
 
-            const coursesToShow = isGeneralEducation
-              ? blocks
-                  .filter((block) =>
-                    coursesForType.some((course) => course.block_type === block)
-                  )
-                  .map((block) => ({
-                    block,
-                    courses: coursesForType.filter(
-                      (course) => course.block_type === block
-                    ),
-                  }))
-              : [{ courses: coursesForType }];
-
-            if (coursesToShow.some(({ courses }) => courses.length > 0)) {
-              return (
-                <div key={header}>
-                  <div className="course_type">
-                    <h1>{types[header]}</h1>
-                  </div>
-                  <Grid container spacing={5} style={{ padding: 20 }}>
-                    {isGeneralEducation
-                      ? coursesToShow.map(({ block, courses }) => (
-                          <Grid
-                            item
-                            xs={12}
-                            sm={6}
-                            md={4}
-                            lg={4}
-                            spacing={5}
-                            key={courses._id}
-                            style={{ marginLeft: -45, marginRight: 40 }}
+      <Stack sx={{ m: "2rem 2rem", display: "flex", flexDirection: "row" }}>
+        <Stack sx={{ flex: "1" }}>
+          <SideTable data={exCourses} />
+        </Stack>
+        <Stack sx={{ flex: "0.5" }}></Stack>
+        <Stack sx={{ flex: "5" }}>
+          {/* <Typography variant="h4">
+            {getTermLabel(currentTerm)} {currentYear}
+          </Typography> */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <MRT_GlobalFilterTextField table={table} />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={showAllCourses}
+                  onChange={(e) => setShowAllCourses(e.target.checked)}
+                />
+              }
+              label="Show all courses"
+            />
+          </Box>
+          <TableContainer>
+            <Table outlined>
+              <TableHead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableCell align="center" variant="head" key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.Header ??
+                                header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHead>
+              <TableBody>
+                {table.getRowModel().rows.map((row, rowIndex) => (
+                  <TableRow key={row.id} selected={row.getIsSelected()}>
+                    {row.getVisibleCells().map((cell, _columnIndex) => (
+                      <TableCell align="center" variant="body" key={cell.id}>
+                        {cell.column.columnDef.accessorKey == "term" ? (
+                          <Stack
+                            sx={{
+                              display: "flex",
+                              flexDirection: "row",
+                              justifyContent: "center",
+                            }}
                           >
-                            <Badge
-                              badgeContent={
-                                <DoneOutlinedIcon
-                                  fontSize="large"
-                                  color="success"
-                                />
-                              }
-                              invisible={
-                                !courses.some(
-                                  (course) => checkboxResponses[course._id]
-                                )
-                              }
-                            >
-                              <BlockModal
-                                key={block}
-                                enableCheckbox
-                                data={courses}
-                                block={block}
-                                handleCheckboxChange={handleCheckboxChange}
-                                checkboxResponses={checkboxResponses}
-                              />
-                            </Badge>
-                          </Grid>
-                        ))
-                      : coursesToShow[0].courses.map((course) => {
-                          const prerequisitesPresent =
-                            course.pre_requisite.course_code.every(
-                              (prerequisite) => {
-                                return exCourses.some((selectedCourse) =>
-                                  selectedCourse.course_code.includes(
-                                    prerequisite
-                                  )
-                                );
-                              }
-                            );
+                            {cell.getValue().map((str, index) => (
+                              <Box
+                                key={index}
+                                sx={{
+                                  border: "1px solid black",
+                                  padding: "3px",
+                                  marginRight: "5px",
+                                }}
+                              >
+                                {abbreviateTerm(str)}
+                              </Box>
+                            ))}
+                          </Stack>
+                        ) : (
+                          <MRT_TableBodyCellValue
+                            cell={cell}
+                            table={table}
+                            staticRowIndex={rowIndex}
+                          />
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <MRT_TablePagination table={table} />
+          </TableContainer>
+          <MRT_ToolbarAlertBanner stackAlertBanner table={table} />
 
-                          return (
-                            <Grid
-                              item
-                              xs={12}
-                              sm={6}
-                              md={4}
-                              lg={4}
-                              key={course._id}
-                            >
-                              <CourseCard
-                                enableCheckbox={prerequisitesPresent}
-                                requsiteRequired={!prerequisitesPresent}
-                                hoverable={true}
-                                course={course}
-                                onCheckboxChange={(isChecked) =>
-                                  handleCheckboxChange(course._id, isChecked)
-                                }
-                              />
-                            </Grid>
-                          );
-                        })}
-                  </Grid>
-                </div>
-              );
-            } else {
-              return null;
-            }
-          })}
-        </Grid>
-      </Box>
+          <Box>BOX1</Box>
+        </Stack>
+      </Stack>
+
+      {/* ********************TEST END********************** */}
     </Box>
   );
 };

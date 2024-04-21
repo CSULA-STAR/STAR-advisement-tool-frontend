@@ -35,3 +35,16 @@ export const getNextYears = (count) => {
   }
   return years;
 };
+
+export const abbreviateTerm = (term) => {
+  switch (term.toLowerCase()) {
+    case "fall":
+      return "F";
+    case "spring":
+      return "S";
+    case "summer":
+      return "X";
+    default:
+      return term;
+  }
+};
