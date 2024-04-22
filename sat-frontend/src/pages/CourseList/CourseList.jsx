@@ -136,20 +136,52 @@ const CourseList = () => {
             <div className="course_type">
               <h2>{types[course_type]}</h2>
             </div>
-            <div className="course-group">
-              {matchedForThisType.map(({ csulaCourse, selectedCourse }) => (
-                <div className="course-row" key={csulaCourse._id}>
-                  {csulaCourse.course_type === "general_education" ? (
-                    blocks
-                      .filter((block) => csulaCourse.block_type === block)
-                      .map((block) => (
-                        <div key={block} style={{ width: "100%" }}>
-                          <h2 className="blockTitle">{block_types[block]}</h2>
-                          <div className="course-row">
-                            <div className="college-column">
-                              {!selectedSchoolHeadingRendered && (
-                                <h2>{college?.name}</h2>
-                              )}
+            <Box className="course-group">
+              <Box>
+                <div
+                  className="row"
+                  style={{
+                    display: "flex",
+                    flextDirection: "row",
+                    justifyContent: "space-between",
+                    paddingLeft: 260,
+                    margin: "30px 0",
+                  }}
+                >
+                  <div className="column">
+                    {!selectedSchoolHeadingRendered && (
+                      <Typography
+                        variant="h6"
+                        display={"inline-block"}
+                        fontWeight={"bold"}
+                      >
+                        {college?.name}
+                      </Typography>
+                    )}
+                  </div>
+                  <div
+                    className="columnCalstate column"
+                    style={{ paddingRight: 280 }}
+                  >
+                    {!csulaHeadingRendered && (
+                      <Typography
+                        variant="h6"
+                        display={"inline-block"}
+                        fontWeight={"bold"}
+                      >
+                        California State University
+                      </Typography>
+                    )}
+                  </div>
+                </div>
+                {matchedForThisType.map(({ csulaCourse, selectedCourse }) => (
+                  <Box className="course-row" key={csulaCourse._id}>
+                    {csulaCourse.course_type === "general_education" ? (
+                      blocks
+                        .filter((block) => csulaCourse.block_type === block)
+                        .map((block) => (
+                          <div key={block.block_id} className="course-row">
+                            <Box className="college-column" width={360}>
                               <CourseCard
                                 enableCheckbox={true}
                                 hoverable={false}
