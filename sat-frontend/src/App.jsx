@@ -6,7 +6,6 @@ import CourseSelection from "./pages/CourseSelection/CourseSelection.jsx";
 import Home from "./pages/Home/Home";
 import SelectedCourses from "./pages/SelectedCourses/SelectedCourses";
 import store from "./store";
-import RemainingCourseList from "../src/pages/CourseList/RemainingCourseList";
 
 const App = () => {
   return (
@@ -19,10 +18,6 @@ const App = () => {
             <Route path="/courselist" element={<CourseList />} />
             <Route path="/selected-courses" element={<SelectedCourses />} />
             <Route path="/course-selection" element={<CourseSelection />} />
-            <Route
-              path="/justify-unselected"
-              element={<RemainingCourseList />}
-            />
           </Routes>
         </main>
       </Provider>

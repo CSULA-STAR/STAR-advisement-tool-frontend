@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   Modal,
   Typography,
@@ -7,33 +6,14 @@ import {
   Button,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import PropTypes from "prop-types";
 
 const CustomModal = ({
-  course,
   openModal,
   handleModalClose,
-  handleUpdateCourse, // New callback prop to handle the updated course
+  handleCommentClick,
   fullSize,
 }) => {
-  // State to manage the input comment
-  const [comment, setComment] = useState("");
-
-  // Handle comment input change
-  const handleCommentChange = (event) => {
-    setComment(event.target.value);
-  };
-
-  // Function to handle submission of the comment
-  const handleSubmitComment = (event) => {
-    event.preventDefault(); // Prevent the form from causing a page reload
-    const updatedCourse = {
-      ...course,
-      comment: comment, // Add the comment to the course object
-    };
-    handleUpdateCourse(updatedCourse); // Call the callback with the updated course
-    handleModalClose(); // Close the modal
-  };
-
   return (
     <Modal open={openModal} onClose={handleModalClose}>
       <div
@@ -67,16 +47,21 @@ const CustomModal = ({
               padding: "12px",
               fontFamily: "Arial, sans-serif",
             }}
-            value={comment} // Controlled component
-            onChange={handleCommentChange} // Update the state on change
           />
-          <Button variant="contained" onClick={handleSubmitComment} fullWidth>
+          <Button variant="contained" onClick={handleModalClose} fullWidth>
             Submit Comment
           </Button>
         </Paper>
       </div>
     </Modal>
   );
+};
+
+CustomModal.propTypes = {
+  openModal: PropTypes.bool.isRequired,
+  handleModalClose: PropTypes.func.isRequired,
+  handleCommentClick: PropTypes.func.isRequired,
+  fullSize: PropTypes.bool,
 };
 
 export default CustomModal;
