@@ -255,7 +255,7 @@ const CourseList = () => {
                       blocks
                         .filter((block) => csulaCourse.block_type === block)
                         .map((block) => (
-                          <div className="course-row">
+                          <div key={block.block_id} className="course-row">
                             <Box className="college-column" width={360}>
                               <CourseCard
                                 enableCheckbox={true}
