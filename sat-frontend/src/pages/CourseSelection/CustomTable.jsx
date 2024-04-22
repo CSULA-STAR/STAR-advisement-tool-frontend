@@ -1,27 +1,14 @@
 import {
-  Box,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
+  Typography
 } from "@mui/material";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import {
-  MRT_GlobalFilterTextField,
-  MRT_TableBodyCellValue,
-  MRT_TablePagination,
-  flexRender,
-  useMaterialReactTable,
   MaterialReactTable,
+  useMaterialReactTable
 } from "material-react-table";
 import PropTypes from "prop-types";
 import React from "react";
-import { abbreviateTerm } from "../../utils";
-import Checkbox from "@mui/material/Checkbox";
-import FormControlLabel from "@mui/material/FormControlLabel";
 const CustomTable = ({
   columns,
   data,

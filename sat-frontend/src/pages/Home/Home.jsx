@@ -14,7 +14,7 @@ const Home = () => {
   const [college, setCollege] = useState("");
   const [schools, setSchools] = useState([]);
   const [programs, setPrograms] = useState([]);
-  const [startYear, setStartYear] = useState(new Date().getFullYear());
+  const [startYear, setStartYear] = useState();
 
   const [selectedProgram, setSelectedProgram] = useState();
   const [selectedTerm, setSelectedTerm] = useState();
@@ -44,7 +44,7 @@ const Home = () => {
   };
 
   const handleSubmit = () => {
-    if (!college || !selectedProgram || !selectedTerm) {
+    if (!college || !selectedProgram || !selectedTerm || !startYear) {
       alert("Please select all fields before submitting.");
       return;
     }
@@ -157,7 +157,7 @@ const Home = () => {
             id="year"
             label="Start Year"
             options={getNextYears(3)}
-            value={startYear.value}
+            value={startYear}
             onChange={handleStartYearChange}
           />
 

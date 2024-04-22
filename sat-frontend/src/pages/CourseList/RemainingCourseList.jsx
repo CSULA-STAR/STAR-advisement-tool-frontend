@@ -37,6 +37,7 @@ export default function RemainingCourseList(params) {
   const [courses, setCourses] = useState([]);
 
   const handleUpdateCourse = (updatedCourse) => {
+    console.log("updatedCourse", updatedCourse);
     setCourses((prevCourses) => {
       // Find the index of the existing course with the same _id
       const index = prevCourses.findIndex(
@@ -62,6 +63,10 @@ export default function RemainingCourseList(params) {
     }));
   };
 
+  // 1. Checkbox checked==> enbable add comment
+  // 2. commented courses should added to selected term courses before adding to store
+  // 3. Add validfation to Next button, if any course is selected, it should have a non empty comment
+
   const goToSelectedCoursesPage = () => {
     const selectedCourses = csulaCourseList.filter(
       (course) => checkboxResponses[course._id]
@@ -80,8 +85,8 @@ export default function RemainingCourseList(params) {
     console.log("commentedcourses", courses, courses.length);
 
     // localStorage.setItem("commentedCourses", JSON.stringify(courses));
-    // console.log("Commented courses : ", courses);
-    // console.log("start term in ramainingCourseList ", startTerm);
+    console.log("Commented courses : ", courses);
+    console.log("start term in ramainingCourseList ", startTerm);
 
     navigate("/course-selection", {
       state: {
@@ -103,7 +108,7 @@ export default function RemainingCourseList(params) {
             {uncheckedMatchedCsulaCourses.map((course) => (
               <Grid key={course._id} item xs={6} sm={4}>
                 <CourseCard
-                  enableCheckbox={false}
+                  enableCheckbox={true}
                   hoverable={false}
                   course={course}
                   isChecked={checkboxResponses[course._id]}

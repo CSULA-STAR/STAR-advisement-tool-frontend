@@ -64,39 +64,13 @@ const columns = [
 ];
 
 const CourseSelection = () => {
-  const courseTypes = [
-    "upper_division",
-    "lower_division",
-    "general_education",
-    "senior_design",
-    "technical_elective",
-  ];
-
-  const types = {
-    upper_division: "Upper Division",
-    lower_division: "Lower Division",
-    general_education: "General Education",
-    senior_design: "Senior Design",
-    technical_elective: "Technical Elective",
-  };
-
-  const blocks = [
-    "block_c",
-    "block_d",
-    "block_a1",
-    "block_a2",
-    "us_constitution",
-    "us_history",
-    "block_e",
-  ];
-
   const location = useLocation();
-  const [termData, setTermData] = useState([]);
-  const [courseListData, setCourseListData] = useState([]);
-  // const [checkboxResponses, setCheckboxResponses] = useState({});
   const navigate = useNavigate();
   const exCourses = useSelector((state) => state);
   const dispatch = useDispatch();
+  const [termData, setTermData] = useState([]);
+  const [courseListData, setCourseListData] = useState([]);
+  // const [checkboxResponses, setCheckboxResponses] = useState({});
   const [navigationCount, setNavigationCount] = useState(0);
   const { courseList, startTerm, startYear, program } = location.state || {};
   const [geCourses, setGeCourses] = useState([]);
@@ -251,7 +225,6 @@ const CourseSelection = () => {
 
   const handleBlockClick = (block) => {
     setIsTableVisible(true);
-
     setCurrTableData({
       title: block.name,
       courses: geCourses.filter(
@@ -327,8 +300,6 @@ const CourseSelection = () => {
         </Box>
       </Stack>
 
-      {/* *************TEST********************** */}
-
       <Stack sx={{ m: "2rem 2rem", display: "flex", flexDirection: "row" }}>
         <Stack sx={{ flex: "1" }}>
           <SideTable data={exCourses} />
@@ -339,7 +310,6 @@ const CourseSelection = () => {
             {getTermLabel(currentTerm)} {currentYear}
           </Typography> */}
           <Box sx={{ pb: "1rem" }}>
-            {/* {renderTable({ tableData: courseListData })} */}
             <CustomTable
               data={courseListData}
               columns={columns}
@@ -359,7 +329,7 @@ const CourseSelection = () => {
                   <Typography variant="h5">{currTableData.title}</Typography>
                   <CustomTable
                     data={currTableData.courses}
-                    columns={sideTableColumns}
+                    columns={columns}
                     rowSelection={geRowSelection}
                     setRowSelection={setGeRowSelection}
                   />
@@ -369,8 +339,6 @@ const CourseSelection = () => {
           </Stack>
         </Stack>
       </Stack>
-
-      {/* ********************TEST END********************** */}
     </Box>
   );
 };
