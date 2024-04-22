@@ -1,38 +1,19 @@
-import {
-  Box,
-  Button,
-  Stack,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Stack, Typography } from "@mui/material";
+import axios from "axios";
 import {
   MRT_GlobalFilterTextField,
-  MRT_TableBodyCellValue,
-  MRT_TablePagination,
   MRT_ToolbarAlertBanner,
-  flexRender,
   useMaterialReactTable,
 } from "material-react-table";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { addCourse } from "../../slices/selectedCourseSlice";
-import {
-  getNextTerm,
-  getTermLabel,
-  toSentenceCase,
-  abbreviateTerm,
-} from "../../utils";
+import { getNextTerm, getTermLabel, toSentenceCase } from "../../utils";
 import "./courseSelectionStyle.css";
-// import { data } from "./makeData";
+
+import CustomTable from "./CustomTable";
 import SideTable from "./SideTable";
-import Checkbox from "@mui/material/Checkbox";
-import FormControlLabel from "@mui/material/FormControlLabel";
 
 const columns = [
   {
@@ -51,10 +32,6 @@ const columns = [
     accessorKey: "term",
     header: "Offered in",
   },
-  // {
-  //   accessorKey: "state",
-  //   header: "State",
-  // },
 ];
 
 const CourseSelection = () => {
@@ -92,32 +69,50 @@ const CourseSelection = () => {
   const exCourses = useSelector((state) => state);
   const dispatch = useDispatch();
   const [navigationCount, setNavigationCount] = useState(0);
-  const { courseList, startTerm, startYear } = location.state || {};
-  const [genEduCourse, setGenEduCourse] = useState([]);
+  const { courseList, startTerm, startYear, program } = location.state || {};
+  const [geCourses, setGeCourses] = useState([]);
+  const [isTableVisible, setIsTableVisible] = useState(false);
+  const [deptBlock, setDeptBlock] = useState([]);
   const [currentTerm, setCurrentTerm] = useState(startTerm.value);
   const [currentYear, setCurrentYear] = useState(startYear);
   const [showAllCourses, setShowAllCourses] = useState(false);
   const [rowSelection, setRowSelection] = useState({});
-  useEffect(() => {
-    setCourseListData(courseList);
-  }, [courseList]);
+  const [geRowSelection, setGeRowSelection] = useState({});
+  const [currTableData, setCurrTableData] = useState([]);
 
   useEffect(() => {
-    console.info({ rowSelection }); //read your managed row selection state
-    // console.info(table.getState().rowSelection); //alternate way to get the row selection state
-  }, [rowSelection]);
+    const fetchCourses = async () => {
+      try {
+        const deptBlockResponse = await axios.get(
+          `http://localhost:3001/fetch-req-block-details?dept=${program.department}`
+        );
+        setDeptBlock(deptBlockResponse.data.blocks);
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
   useEffect(() => {
-    const termCourseList = courseListData.filter((course) =>
+    const termCourseList = courseList.filter((course) =>
       course.term.includes(toSentenceCase(currentTerm))
     );
 
-    const genEdu = courseListData.filter(
+    const ge_courses = termCourseList.filter(
       (course) => course.course_type === "general_education"
     );
 
-    setGenEduCourse(genEdu);
+    const non_ge_courses = termCourseList.filter(
+      (course) => course.course_type !== "general_education"
+    );
+
+    setCourseListData(non_ge_courses);
+    setGeCourses(ge_courses);
+
     setTermData(termCourseList);
-  }, [courseListData, currentTerm]);
+  }, [courseList, currentTerm]);
 
   const handleCheckboxChange = (courseId, isChecked) => {
     setCheckboxResponses({ ...checkboxResponses, [courseId]: isChecked });
@@ -179,10 +174,10 @@ const CourseSelection = () => {
       [courseId]: isChecked,
     }));
   };
-
+  console.log("filterdones", courseListData);
   const table = useMaterialReactTable({
     columns,
-    data: termData,
+    data: courseListData,
     enableRowSelection: true,
     getRowId: (row) => row._Id,
     onRowSelectionChange: setRowSelection,
@@ -197,6 +192,50 @@ const CourseSelection = () => {
     },
     paginationDisplayMode: "pages",
   });
+
+  const handleBlockClick = (block) => {
+    setIsTableVisible(true);
+
+    setCurrTableData({
+      title: block.name,
+      courses: geCourses.filter(
+        (course) => course.block_type == block.block_id
+      ),
+    });
+  };
+
+  const renderBlocks = () => {
+    console.log("renderingnn");
+    return (
+      <Stack direction="row" spacing={2}>
+        {deptBlock.map((block, index) => (
+          <Box
+            key={index}
+            sx={{
+              border: "1px solid grey",
+              p: 2,
+              bgcolor: "background.paper",
+              boxShadow: 1,
+              borderRadius: 1,
+              cursor: "pointer",
+            }}
+            onClick={() => handleBlockClick(block)}
+          >
+            <Typography
+              sx={{ fontWeight: "bold" }}
+              variant="subtitle2"
+              component="div"
+            >
+              GE
+            </Typography>
+            <Typography variant="body" component="div">
+              {block.name}
+            </Typography>
+          </Box>
+        ))}
+      </Stack>
+    );
+  };
 
   return (
     <Box sx={{ textAlign: "center" }}>
@@ -243,87 +282,35 @@ const CourseSelection = () => {
           {/* <Typography variant="h4">
             {getTermLabel(currentTerm)} {currentYear}
           </Typography> */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <MRT_GlobalFilterTextField table={table} />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={showAllCourses}
-                  onChange={(e) => setShowAllCourses(e.target.checked)}
-                />
-              }
-              label="Show all courses"
+          <Box sx={{ pb: "1rem" }}>
+            {/* {renderTable({ tableData: courseListData })} */}
+            <CustomTable
+              data={courseListData}
+              columns={columns}
+              rowSelection={rowSelection}
+              setRowSelection={setRowSelection}
+              filters={true}
+              showAllCourses={showAllCourses}
+              setShowAllCourses={setShowAllCourses}
             />
+            <MRT_ToolbarAlertBanner stackAlertBanner table={table} />
           </Box>
-          <TableContainer>
-            <Table outlined>
-              <TableHead>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <TableCell align="center" variant="head" key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.Header ??
-                                header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableHead>
-              <TableBody>
-                {table.getRowModel().rows.map((row, rowIndex) => (
-                  <TableRow key={row.id} selected={row.getIsSelected()}>
-                    {row.getVisibleCells().map((cell, _columnIndex) => (
-                      <TableCell align="center" variant="body" key={cell.id}>
-                        {cell.column.columnDef.accessorKey == "term" ? (
-                          <Stack
-                            sx={{
-                              display: "flex",
-                              flexDirection: "row",
-                              justifyContent: "center",
-                            }}
-                          >
-                            {cell.getValue().map((str, index) => (
-                              <Box
-                                key={index}
-                                sx={{
-                                  border: "1px solid black",
-                                  padding: "3px",
-                                  marginRight: "5px",
-                                }}
-                              >
-                                {abbreviateTerm(str)}
-                              </Box>
-                            ))}
-                          </Stack>
-                        ) : (
-                          <MRT_TableBodyCellValue
-                            cell={cell}
-                            table={table}
-                            staticRowIndex={rowIndex}
-                          />
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <MRT_TablePagination table={table} />
-          </TableContainer>
-          <MRT_ToolbarAlertBanner stackAlertBanner table={table} />
-
-          <Box>BOX1</Box>
+          <Stack sx={{ mt: "2rem" }}>
+            {renderBlocks()}
+            <Box sx={{ mt: "2rem" }}>
+              {isTableVisible ? (
+                <>
+                  <Typography variant="h5">{currTableData.title}</Typography>
+                  <CustomTable
+                    data={currTableData.courses}
+                    columns={columns}
+                    rowSelection={geRowSelection}
+                    setRowSelection={setGeRowSelection}
+                  />
+                </>
+              ) : null}
+            </Box>
+          </Stack>
         </Stack>
       </Stack>
 
