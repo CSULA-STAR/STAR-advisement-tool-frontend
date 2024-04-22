@@ -1,55 +1,56 @@
-import { useMemo } from "react";
+import React from "react";
 import {
-  MRT_Table, //import alternative sub-component if we do not want toolbars
-  useMaterialReactTable,
-} from "material-react-table";
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from "@mui/material";
+import { toSentenceCase } from "../../utils";
+const SideTable = ({ data }) => {
+  console.log("data", data);
+  const coursesByTerm = data?.reduce((acc, course) => {
+    const { term, year } = course.selected_term;
+    if (!term) return acc;
 
-export const SideTable = ({ data }) => {
-  console.log("data:", data);
-  const columns = useMemo(
-    () => [
-      {
-        accessorKey: "term",
-        header: "Term",
-      },
-    ],
-    []
+    const key = `${toSentenceCase(term)} ${year}`;
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    const courseCodes = course.course_code;
+    acc[key].push(courseCodes);
+    return acc;
+  }, {});
+
+  return (
+    <TableContainer component={Paper}>
+      <Table>
+        <TableBody>
+          {Object.entries(coursesByTerm).map(([term, courses], index) => (
+            <React.Fragment key={index}>
+              <TableRow>
+                <TableCell colSpan={2} align="center">
+                  <strong>{term}</strong>
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>
+                  {courses.map((course, index) => (
+                    <React.Fragment key={index}>
+                      <span>{course}</span>
+                      {index !== courses.length - 1 && <br />}{" "}
+                    </React.Fragment>
+                  ))}
+                </TableCell>
+              </TableRow>
+            </React.Fragment>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
-
-  const table = useMaterialReactTable({
-    columns,
-    data,
-    enableColumnActions: false,
-    enableColumnFilters: false,
-    enablePagination: false,
-    enableSorting: false,
-    mrtTheme: (theme) => ({
-      baseBackgroundColor: theme.palette.background.default, //change default background color
-    }),
-    muiTableBodyRowProps: { hover: false },
-    muiTableProps: {
-      sx: {
-        border: "1px solid rgba(81, 81, 81, .5)",
-        caption: {
-          captionSide: "top",
-        },
-      },
-    },
-    muiTableHeadCellProps: {
-      sx: {
-        border: "1px solid rgba(81, 81, 81, .5)",
-        fontWeight: "normal",
-      },
-    },
-    muiTableBodyCellProps: {
-      sx: {
-        border: "1px solid rgba(81, 81, 81, .5)",
-      },
-    },
-    renderCaption: ({ table }) => `Terms`,
-  });
-
-  return <MRT_Table table={table} />;
 };
 
 export default SideTable;

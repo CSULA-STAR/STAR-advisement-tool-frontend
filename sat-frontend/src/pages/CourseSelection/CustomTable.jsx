@@ -15,6 +15,7 @@ import {
   MRT_TablePagination,
   flexRender,
   useMaterialReactTable,
+  MaterialReactTable,
 } from "material-react-table";
 import PropTypes from "prop-types";
 import React from "react";
@@ -28,12 +29,21 @@ const CustomTable = ({
   setRowSelection,
   filters,
   showAllCourses,
-  setShowAllCourses,
+  handleShowAllCourses,
 }) => {
   const table = useMaterialReactTable({
     columns,
     data,
     enableRowSelection: true,
+    // enableExpanding: true,
+    muiTableBodyRowProps: ({ row }) => ({
+      onClick: (event) => {
+        console.info(event, row.id);
+      },
+      sx: {
+        cursor: "pointer",
+      },
+    }),
     getRowId: (row) => row._Id,
     onRowSelectionChange: setRowSelection,
     state: { rowSelection },
@@ -46,12 +56,12 @@ const CustomTable = ({
       variant: "outlined",
     },
     paginationDisplayMode: "pages",
-    renderEmptyRowsFallback: ({ table }) => (
-      <span>Customized No Rows Overlay</span>
+    renderEmptyRowsFallback: () => (
+      <Typography variant="body1">No courses available</Typography>
     ),
     muiTableProps: {
       sx: {
-        border: "1px solid black",
+        border: "1px solid lightgrey",
         caption: {
           captionSide: "top",
         },
@@ -59,51 +69,68 @@ const CustomTable = ({
     },
     muiTableHeadCellProps: {
       sx: {
-        border: "1px solid black",
-        fontStyle: "italic",
-        fontWeight: "normal",
+        // border: "1px solid black",
+        fontWeight: "bold",
       },
     },
     muiTableBodyCellProps: {
       sx: {
-        border: "1px solid black",
+        // border: "px solid black",
       },
     },
-  });
 
-  const rows = table.getRowModel().rows;
+    renderTopToolbarCustomActions: ({ table }) => (
+      <>
+        {filters ? (
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={showAllCourses}
+                onChange={(e) => handleShowAllCourses(e.target.checked)}
+              />
+            }
+            label="Show all courses"
+          />
+        ) : null}
+      </>
+    ),
+  });
 
   return (
     <>
-      {rows.length > 0 ? (
-        <>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <MRT_GlobalFilterTextField table={table} />
-            {filters ? (
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={showAllCourses}
-                    onChange={(e) => setShowAllCourses(e.target.checked)}
-                  />
-                }
-                label="Show all courses"
+      <MaterialReactTable table={table} />
+      {/*
+
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <MRT_GlobalFilterTextField table={table} />
+        {filters ? (
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={showAllCourses}
+                onChange={(e) => handleShowAllCourses(e.target.checked)}
               />
-            ) : null}
-          </Box>
-          <TableContainer>
-            <Table outlined>
+            }
+            label="Show all courses"
+          />
+        ) : null}
+      </Box>
+
+      {rows.length > 0 ? (
+        <> 
+        <TableContainer>
+            <Table sx={{ border: "1px solid lightgrey" }}>
               <TableHead>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
-                      <TableCell align="center" variant="head" key={header.id}>
+                      <TableCell align="left" variant="head" key={header.id}>
                         {header.isPlaceholder
                           ? null
                           : flexRender(
@@ -120,13 +147,13 @@ const CustomTable = ({
                 {rows.map((row, rowIndex) => (
                   <TableRow key={row.id} selected={row.getIsSelected()}>
                     {row.getVisibleCells().map((cell, _columnIndex) => (
-                      <TableCell align="center" variant="body" key={cell.id}>
+                      <TableCell align="left" variant="body" key={cell.id}>
                         {cell.column.columnDef.accessorKey === "term" ? (
                           <Stack
                             sx={{
                               display: "flex",
                               flexDirection: "row",
-                              justifyContent: "center",
+                              justifyContent: "start",
                             }}
                           >
                             {cell.getValue().map((str, index) => (
@@ -156,11 +183,11 @@ const CustomTable = ({
               </TableBody>
             </Table>
             <MRT_TablePagination table={table} />
-          </TableContainer>
+          </TableContainer> 
         </>
       ) : (
         <Typography variant="body1">No courses available</Typography>
-      )}
+      )}*/}
     </>
   );
 };
