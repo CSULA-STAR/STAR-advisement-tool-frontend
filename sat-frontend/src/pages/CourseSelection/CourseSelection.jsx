@@ -9,7 +9,12 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { addCourse } from "../../slices/selectedCourseSlice";
-import { getNextTerm, getTermLabel, toSentenceCase } from "../../utils";
+import {
+  getNextTerm,
+  getTermLabel,
+  toSentenceCase,
+  abbreviateTerm,
+} from "../../utils";
 import "./courseSelectionStyle.css";
 
 import CustomTable from "./CustomTable";
@@ -31,6 +36,30 @@ const columns = [
   {
     accessorKey: "term",
     header: "Offered in",
+    Cell: ({ cell }) => {
+      return (
+        <Stack
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "start",
+          }}
+        >
+          {cell.getValue().map((str, index) => (
+            <Box
+              key={index}
+              sx={{
+                border: "1px solid black",
+                padding: "3px",
+                marginRight: "5px",
+              }}
+            >
+              {abbreviateTerm(str)}
+            </Box>
+          ))}
+        </Stack>
+      );
+    },
   },
 ];
 
@@ -64,7 +93,7 @@ const CourseSelection = () => {
   const location = useLocation();
   const [termData, setTermData] = useState([]);
   const [courseListData, setCourseListData] = useState([]);
-  const [checkboxResponses, setCheckboxResponses] = useState({});
+  // const [checkboxResponses, setCheckboxResponses] = useState({});
   const navigate = useNavigate();
   const exCourses = useSelector((state) => state);
   const dispatch = useDispatch();
@@ -80,6 +109,12 @@ const CourseSelection = () => {
   const [geRowSelection, setGeRowSelection] = useState({});
   const [currTableData, setCurrTableData] = useState([]);
 
+  const sideTableColumns = [
+    {
+      accessorKey: "term",
+      header: { currentTerm },
+    },
+  ];
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -104,19 +139,29 @@ const CourseSelection = () => {
       (course) => course.course_type === "general_education"
     );
 
-    const non_ge_courses = termCourseList.filter(
+    const non_ge_courses_test = termCourseList.filter(
       (course) => course.course_type !== "general_education"
     );
-
+    const non_ge_courses = termCourseList.filter(
+      (course) =>
+        course.course_type !== "general_education" &&
+        (course.pre_requisite.course_code.length === 0 ||
+          course.pre_requisite.course_code.some((code) =>
+            exCourses.some((selectedCourse) =>
+              selectedCourse.course_code.includes(code)
+            )
+          ))
+    );
+    console.log("non_ge_courses", non_ge_courses, non_ge_courses_test);
     setCourseListData(non_ge_courses);
     setGeCourses(ge_courses);
 
     setTermData(termCourseList);
   }, [courseList, currentTerm]);
 
-  const handleCheckboxChange = (courseId, isChecked) => {
-    setCheckboxResponses({ ...checkboxResponses, [courseId]: isChecked });
-  };
+  // const handleCheckboxChange = (courseId, isChecked) => {
+  //   setCheckboxResponses({ ...checkboxResponses, [courseId]: isChecked });
+  // };
 
   const handlePreviousClick = () => {};
   const handleFinishClick = () => {};
@@ -167,13 +212,24 @@ const CourseSelection = () => {
     }
   };
 
-  const handleRowSelectionChange = (selectedIndex, isChecked) => {
-    const courseId = termData[selectedIndex]._id;
-    setRowSelection((prevSelection) => ({
-      ...prevSelection,
-      [courseId]: isChecked,
-    }));
+  const handleShowAllCourses = (res) => {
+    console.log("res", res);
+    setShowAllCourses(res);
+    if (res === true) {
+      const non_ge_courses = courseListData.filter(
+        (course) => course.course_type !== "general_education"
+      );
+      setCourseListData(non_ge_courses);
+    }
   };
+
+  // const handleRowSelectionChange = (selectedIndex, isChecked) => {
+  //   const courseId = termData[selectedIndex]._id;
+  //   setRowSelection((prevSelection) => ({
+  //     ...prevSelection,
+  //     [courseId]: isChecked,
+  //   }));
+  // };
   console.log("filterdones", courseListData);
   const table = useMaterialReactTable({
     columns,
@@ -291,7 +347,7 @@ const CourseSelection = () => {
               setRowSelection={setRowSelection}
               filters={true}
               showAllCourses={showAllCourses}
-              setShowAllCourses={setShowAllCourses}
+              handleShowAllCourses={handleShowAllCourses}
             />
             <MRT_ToolbarAlertBanner stackAlertBanner table={table} />
           </Box>
@@ -303,7 +359,7 @@ const CourseSelection = () => {
                   <Typography variant="h5">{currTableData.title}</Typography>
                   <CustomTable
                     data={currTableData.courses}
-                    columns={columns}
+                    columns={sideTableColumns}
                     rowSelection={geRowSelection}
                     setRowSelection={setGeRowSelection}
                   />

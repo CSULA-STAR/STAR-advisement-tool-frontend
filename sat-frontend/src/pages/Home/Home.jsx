@@ -7,8 +7,6 @@ import { TERMS } from "../../constants";
 import { getNextYears } from "../../utils";
 import "./HomeStyle.css";
 import { Typography } from "@mui/material";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import { InputLabel } from "@mui/material";
 
 const Home = () => {
   const [college, setCollege] = useState("");
@@ -109,71 +107,50 @@ const Home = () => {
   }, [college]);
 
   return (
-    <Box
-      sx={{
-        height: "80vh",
-        width: "100vw",
-        textAlign: "center",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <Box>
-        <Stack direction="column" alignItems="center" spacing={2}>
-          <Typography
-            variant="h5"
-            component="div"
-            padding={{ sm: 3 }}
-            fontSize={{ sm: 26 }}
-          >
-            Please select the school you transfer from, the Cal State LA program
-            you want to transfer to, and the starting term.
-          </Typography>
-
+    <Box sx={{ textAlign: "center" }}>
+      <Stack direction="column" alignItems="center" spacing={2}>
+        <Typography variant="h5" component="div">
+          Select your school
+        </Typography>
+        <SelectionDropdown
+          label="Select College"
+          options={schools}
+          value={college.value}
+          onChange={handleChange}
+        />
+        {college && (
           <SelectionDropdown
-            id="college"
-            label="From School"
-            options={schools}
-            value={college.value}
-            onChange={handleChange}
-          />
-
-          <SelectionDropdown
-            id="program"
-            label="To Cal State LA program"
+            label="Select Program"
             options={programs}
-            value={selectedProgram?.value}
+            value={selectedProgram.value}
             onChange={handleProgramChange}
           />
+        )}
+        {selectedProgram && (
           <SelectionDropdown
-            id="term"
             label="Start Term"
             options={filteredTerms}
             value={selectedTerm}
             onChange={handleTermChange}
           />
+        )}
+        {selectedProgram && (
           <SelectionDropdown
-            id="year"
             label="Start Year"
             options={getNextYears(3)}
             value={startYear.value}
             onChange={handleStartYearChange}
           />
-
-          <Button
-            onClick={handleSubmit}
-            // disabled={isSubmitDisabled}
-            variant="contained"
-            style={{
-              backgroundColor: "#FFCE00",
-              paddingRight: 5,
-            }}
-          >
-            Next <NavigateNextIcon />
-          </Button>
-        </Stack>
-      </Box>
+        )}
+        <Button
+          onClick={handleSubmit}
+          // disabled={isSubmitDisabled}
+          variant="contained"
+          style={{ backgroundColor: "#FFCE00", color: "#000" }}
+        >
+          Submit
+        </Button>
+      </Stack>
     </Box>
   );
 };

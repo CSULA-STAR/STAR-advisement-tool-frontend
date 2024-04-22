@@ -1,5 +1,7 @@
-import Checkbox from "@material-ui/core/Checkbox";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
+import { useState } from "react";
+import PropTypes from "prop-types";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import {
   Box,
   Card,
@@ -10,8 +12,6 @@ import {
   Tooltip,
   Link,
 } from "@mui/material";
-import PropTypes from "prop-types";
-import { useState } from "react";
 import CustomModal from "../Modal";
 import "./courseCardStyle.css";
 
@@ -27,7 +27,6 @@ const CourseCard = ({
   onClick,
   compactView,
   requsiteRequired,
-  handleUpdateCourse,
 }) => {
   const {
     course_name,
@@ -70,225 +69,198 @@ const CourseCard = ({
   return (
     <>
       {!compactView ? (
-        <Box>
-          <Card
-            elevation={3}
-            // variant="outlined"
-            className="course_card"
-            onMouseEnter={hoverable && handleMouseEnter}
-            onMouseLeave={hoverable && handleMouseLeave}
-            onClick={onClick}
-            sx={{ maxWidth: 360 }}
-            style={{
-              marginBottom: "10px",
-              backgroundColor: requsiteRequired ? "" : "",
-            }}
-          >
-            <Box sx={{ p: 2 }}>
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Stack direction="row" alignItems="center">
-                  {enableCheckbox && (
-                    <Typography gutterBottom>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            color="primary"
-                            checked={isChecked}
-                            onChange={handleCheckboxChange}
-                            gutterBottom
-                          />
-                        }
-                      />
-                    </Typography>
-                  )}
-                  {course_code?.map((code, index) => (
-                    <Typography
-                      gutterBottom
-                      variant="h6"
-                      key={index}
-                      component="div"
-                      className="course-code"
-                    >
-                      <strong>
-                        {code}
-                        {index < course_code.length - 1 ? "/ " : ""}
-                      </strong>
-                    </Typography>
-                  ))}
-                </Stack>
-                <Typography gutterBottom variant="h6" className="credits">
-                  {credits}
-                </Typography>
-              </Stack>
-              {!isHovered ? <Divider style={{ marginBottom: "10px" }} /> : null}
-              <Stack>
-                <Tooltip title={course_name}>
-                  <Typography
-                    className="course-name"
-                    color="text.secondary"
-                    variant="body2"
-                    style={{
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {course_name}
-                  </Typography>
-                </Tooltip>
-                <Box style={{ display: "flex", justifyContent: "end" }}>
-                  {addComment ? (
-                    // Use Link component instead of Button
-                    <Link
-                      onClick={handleModalOpen}
-                      style={{
-                        textDecoration: "none",
-                        marginTop: "10px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      Add Comment
-                    </Link>
-                  ) : null}
-                </Box>
-              </Stack>
-              <CustomModal
-                course={course}
-                openModal={openModal}
-                handleModalClose={handleModalClose}
-                handleCommentClick={handleCommentClick}
-                handleUpdateCourse={handleUpdateCourse}
-              />
-            </Box>
-            {isHovered ? (
-              <>
-                <Divider />
-                <Box sx={{ p: 2 }}>
-                  {noRequisites ? null : (
-                    <Stack direction="row" spacing={2}>
-                      {pre_requisite?.course_code.length ? (
-                        <>
-                          <Typography variant="body2">
-                            Pre-requisites:
-                          </Typography>
-
-                          <Tooltip title={pre_requisite?.description}>
-                            <Typography
-                              gutterBottom
-                              variant="body2"
-                              style={
-                                requsiteRequired
-                                  ? {
-                                      color: "red",
-                                      textDecoration: "underline",
-                                      textDecorationColor: "red",
-                                      textDecorationStyle: "solid",
-                                    }
-                                  : {}
-                              }
-                            >
-                              {pre_requisite?.course_code?.join(", ")}
-                            </Typography>
-                          </Tooltip>
-                        </>
-                      ) : null}
-                      {co_requisite?.course_code.length ? (
-                        <>
-                          <Typography variant="body2">Co-requsites:</Typography>
-
-                          <Tooltip title={co_requisite?.description}>
-                            <Typography gutterBottom variant="body2">
-                              {co_requisite?.course_code?.join(", ")}
-                            </Typography>
-                          </Tooltip>
-                        </>
-                      ) : null}
-                    </Stack>
-                  )}
-                  <Stack
-                    direction="row"
-                    spacing={1}
-                    sx={!noRequisites ? { marginTop: 2 } : {}}
-                  >
-                    {term?.map((item) => (
-                      <Chip
-                        key={item}
+        <Card
+          onMouseEnter={hoverable && handleMouseEnter}
+          onMouseLeave={hoverable && handleMouseLeave}
+          onClick={onClick}
+          sx={{ maxWidth: 360, marginBottom: "10px" }}
+          style={{
+            backgroundColor: requsiteRequired ? "#a4a7b0" : "#e3e2e7",
+          }}
+        >
+          <Box sx={{ p: 2 }}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Stack direction="row" alignItems="center">
+                {enableCheckbox && (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
                         color="primary"
-                        label={item}
-                        size="small"
+                        checked={isChecked}
+                        onChange={handleCheckboxChange}
                       />
-                    ))}
-                  </Stack>
-                </Box>
-              </>
-            ) : null}
-          </Card>
-        </Box>
-      ) : (
-        <Box>
-          <Card
-            className="course_card"
-            onClick={onClick}
-            sx={{ maxWidth: 360 }}
-            style={{
-              marginBottom: "10px",
-              backgroundColor: "#e3e2e7",
-            }}
-          >
-            <Box sx={{ p: 1.2 }}>
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Stack direction="row" alignItems="center">
-                  {enableCheckbox && (
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          color="primary"
-                          checked={isChecked}
-                          onChange={handleCheckboxChange}
-                        />
-                      }
-                    />
-                  )}
-                  {course_code?.map((code, index) => (
-                    <Typography variant="subtitle2" key={index} component="div">
-                      <strong className="course-code">
-                        {code}
-                        {index < course_code.length - 1 ? "/ " : ""}
-                      </strong>
-                    </Typography>
-                  ))}
-                </Stack>
-                <Typography variant="subtitle2" component="div">
-                  {credits}
-                </Typography>
+                    }
+                  />
+                )}
+                {course_code?.map((code, index) => (
+                  <Typography variant="h6" key={index} component="div">
+                    <strong>
+                      {code}
+                      {index < course_code.length - 1 ? "/ " : ""}
+                    </strong>
+                  </Typography>
+                ))}
               </Stack>
-              <Stack>
-                <Tooltip title={course_name}>
-                  <Typography
-                    className="course-name"
-                    color="text.secondary"
-                    variant="body2"
-                    style={{
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
+              <Typography variant="h6" component="div">
+                {credits}
+              </Typography>
+            </Stack>
+            {!isHovered ? <Divider style={{ marginBottom: "10px" }} /> : null}
+            <Stack>
+              <Tooltip title={course_name}>
+                <Typography
+                  color="text.secondary"
+                  variant="body2"
+                  sx={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {course_name}
+                </Typography>
+              </Tooltip>
+              <Box sx={{ display: "flex", justifyContent: "end" }}>
+                {addComment ? (
+                  <Link
+                    onClick={handleModalOpen}
+                    sx={{
+                      textDecoration: "none",
+                      marginTop: "10px",
+                      cursor: "pointer",
                     }}
                   >
-                    {course_name}
+                    Add Comment
+                  </Link>
+                ) : null}
+              </Box>
+            </Stack>
+            <CustomModal
+              openModal={openModal}
+              handleModalClose={handleModalClose}
+              handleCommentClick={handleCommentClick}
+            />
+          </Box>
+          {isHovered ? (
+            <>
+              <Divider />
+              <Box sx={{ p: 2 }}>
+                {noRequisites ? null : (
+                  <Stack direction="row" spacing={2}>
+                    {pre_requisite?.course_code.length ? (
+                      <>
+                        <Typography variant="body2">Pre-requisites:</Typography>
+                        <Tooltip title={pre_requisite?.description}>
+                          <Typography
+                            variant="body2"
+                            gutterBottom
+                            sx={
+                              requsiteRequired
+                                ? {
+                                    color: "red",
+                                    textDecoration: "underline",
+                                    textDecorationColor: "red",
+                                    textDecorationStyle: "solid",
+                                  }
+                                : {}
+                            }
+                          >
+                            {pre_requisite?.course_code?.join(", ")}
+                          </Typography>
+                        </Tooltip>
+                      </>
+                    ) : null}
+                    {co_requisite?.course_code.length ? (
+                      <>
+                        <Typography variant="body2">Co-requsites:</Typography>
+                        <Tooltip title={co_requisite?.description}>
+                          <Typography variant="body2" gutterBottom>
+                            {co_requisite?.course_code?.join(", ")}
+                          </Typography>
+                        </Tooltip>
+                      </>
+                    ) : null}
+                  </Stack>
+                )}
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={!noRequisites ? { marginTop: 2 } : {}}
+                >
+                  {term?.map((item) => (
+                    <Chip
+                      key={item}
+                      color="primary"
+                      label={item}
+                      size="small"
+                    />
+                  ))}
+                </Stack>
+              </Box>
+            </>
+          ) : null}
+        </Card>
+      ) : (
+        <Card
+          onClick={onClick}
+          sx={{
+            maxWidth: 360,
+            marginBottom: "10px",
+            backgroundColor: "#e3e2e7",
+          }}
+        >
+          <Box sx={{ p: 1.2 }}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Stack direction="row" alignItems="center">
+                {enableCheckbox && (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        color="primary"
+                        checked={isChecked}
+                        onChange={handleCheckboxChange}
+                      />
+                    }
+                  />
+                )}
+                {course_code?.map((code, index) => (
+                  <Typography variant="subtitle2" key={index} component="div">
+                    <strong>
+                      {code}
+                      {index < course_code.length - 1 ? "/ " : ""}
+                    </strong>
                   </Typography>
-                </Tooltip>
+                ))}
               </Stack>
-            </Box>
-          </Card>
-        </Box>
+              <Typography variant="subtitle2" component="div">
+                {credits}
+              </Typography>
+            </Stack>
+            <Stack>
+              <Tooltip title={course_name}>
+                <Typography
+                  color="text.secondary"
+                  variant="body2"
+                  sx={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {course_name}
+                </Typography>
+              </Tooltip>
+            </Stack>
+          </Box>
+        </Card>
       )}
       {isBlock ? null : null}
     </>
