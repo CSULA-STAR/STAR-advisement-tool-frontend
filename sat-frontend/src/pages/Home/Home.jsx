@@ -9,6 +9,10 @@ import "./HomeStyle.css";
 import { Typography } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { InputLabel } from "@mui/material";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+
+
+
 
 const Home = () => {
   const [college, setCollege] = useState("");
@@ -19,6 +23,25 @@ const Home = () => {
   const [selectedProgram, setSelectedProgram] = useState();
   const [selectedTerm, setSelectedTerm] = useState();
 
+ 
+  const theme = createTheme({
+    typography: {
+      fontFamily: [
+        '-apple-system',
+        'BlinkMacSystemFont',
+        '"Segoe UI"',
+        'Roboto',
+        '"Helvetica Neue"',
+        'Arial',
+        'sans-serif',
+        '"Apple Color Emoji"',
+        '"Segoe UI Emoji"',
+        '"Segoe UI Symbol"',
+      ].join(','),
+    },
+  });
+
+  
   const navigate = useNavigate();
 
   const handleChange = (event) => {
@@ -121,14 +144,20 @@ const Home = () => {
     >
       <Box>
         <Stack direction="column" alignItems="center" spacing={2}>
+          <Box>
+            <img src="CsulaLogo.jpg" alt="" style={{width:200, height:200}} />
+          </Box>
           <Typography
             variant="h5"
             component="div"
-            padding={{ sm: 3 }}
-            fontSize={{ sm: 26 }}
+            px={50}
+            pb={3}
+            fontSize={{ sm: 20 }}
+            textAlign={"center"}
+            theme={theme}
           >
             Please select the school you transfer from, the Cal State LA program
-            you want to transfer to, and the starting term.
+            you want to transfer to, and the starting term
           </Typography>
 
           <SelectionDropdown

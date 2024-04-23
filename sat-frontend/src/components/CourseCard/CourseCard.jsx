@@ -11,7 +11,7 @@ import {
   Link,
 } from "@mui/material";
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CustomModal from "../Modal";
 import "./courseCardStyle.css";
 
@@ -67,6 +67,8 @@ const CourseCard = ({
     setIsHovered(false);
   };
 
+
+
   return (
     <>
       {!compactView ? (
@@ -98,7 +100,7 @@ const CourseCard = ({
                           <Checkbox
                             color="primary"
                             checked={isChecked}
-                            onChange={handleCheckboxChange}
+                            onChange={(e) => onCheckboxChange(course._id, e.target.checked)}
                             gutterBottom
                           />
                         }

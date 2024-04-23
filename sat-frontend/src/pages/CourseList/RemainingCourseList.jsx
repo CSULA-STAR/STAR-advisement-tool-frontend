@@ -1,18 +1,14 @@
-import React from "react";
+
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { Grid, Button } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import CourseCard from "../../components/CourseCard/CourseCard";
-import { getNextTerm, getTermLabel, toSentenceCase } from "../../utils";
 import "../../pages/CourseSelection/courseSelectionStyle.css";
-import BlockModal from "../../components/BlockModal/BlockModal";
-import Badge from "@mui/material/Badge";
-import DoneOutlinedIcon from "@mui/icons-material/DoneOutlined";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { useDispatch } from "react-redux";
-import { addCourse, reset } from "../../slices/selectedCourseSlice";
+import { addCourse } from "../../slices/selectedCourseSlice";
 
 export default function RemainingCourseList(params) {
   const location = useLocation();
@@ -34,29 +30,31 @@ export default function RemainingCourseList(params) {
   const [currentYear, setCurrentYear] = useState(startYear);
   const [courseList, setCourseList] = useState(csulaCourseList);
 
+  
+
   const [courses, setCourses] = useState([]);
 
   const handleUpdateCourse = (updatedCourse) => {
     console.log("updatedCourse", updatedCourse);
     setCourses((prevCourses) => {
-      // Find the index of the existing course with the same _id
       const index = prevCourses.findIndex(
         (course) => course._id === updatedCourse._id
       );
 
-      // If the course already exists in the state, update it
       if (index !== -1) {
         const newCourses = [...prevCourses];
         newCourses[index] = updatedCourse;
         return newCourses;
       }
 
-      // If the course doesn't exist, add it to the array
       return [...prevCourses, updatedCourse];
     });
   };
 
+
+
   const handleCheckboxChange = (courseId, isChecked) => {
+    console.log("Logging the state of checkbox : " , isChecked);
     setCheckboxResponses((prevState) => ({
       ...prevState,
       [courseId]: isChecked,
@@ -72,35 +70,77 @@ export default function RemainingCourseList(params) {
       (course) => checkboxResponses[course._id]
     );
 
+    console.log("selectedCourses " , selectedCourses);
+
+    const prevSelectedString = localStorage.getItem("selectedCourses");
+    const prevSelectedArray = prevSelectedString ? JSON.parse(prevSelectedString) : [];
+
     const selectedCoursesWithTerm = selectedCourses.map((course) => ({
       ...course,
       selected_term: {},
     }));
 
-    const uncheckedCourses = csulaCourseList.filter(
-      (course) => !checkboxResponses[course._id]
-    );
-    console.log("precheck", selectedCoursesWithTerm);
-    dispatch(addCourse(selectedCoursesWithTerm));
-    console.log("commentedcourses", courses, courses.length);
+    const commentedCoursesWithTerm = courses.map((course) => ({
+      ...course,
+      selected_term: {},
+    }));
 
-    // localStorage.setItem("commentedCourses", JSON.stringify(courses));
-    console.log("Commented courses : ", courses);
-    console.log("start term in ramainingCourseList ", startTerm);
+    
+    //Comment Validations
+    const allCoursesCommented = selectedCourses.every((course) => {
+      const courseToCheck = commentedCoursesWithTerm.find((commentedCourse) => commentedCourse._id === course._id);
+      return courseToCheck && courseToCheck.comment && courseToCheck.comment.trim() !== "";
+    })
+    
+    if (!allCoursesCommented) {
+      const courseWithoutComment = selectedCourses.find((course) => {
+        const courseToCheck = commentedCoursesWithTerm.find((commentedCourse) => commentedCourse._id === course._id);
+        return !courseToCheck || !courseToCheck.comment || courseToCheck.comment.trim() === "";
+      })
+      if (courseWithoutComment) {
+        alert(`Please provide a valid comment for ${courseWithoutComment.course_name}`);
+      }
+     
+    }
 
-    navigate("/course-selection", {
-      state: {
-        program,
-        startTerm,
-        courseList: uncheckedCourses,
-        startYear,
-      },
-    });
+    else{
+      console.log("selectedCoursesWithTerm " , selectedCoursesWithTerm);
+      const combinedCourseswithTerm = [...prevSelectedArray, ...commentedCoursesWithTerm];
+       
+   
+     console.log("combinedCourseswithTerm " , combinedCourseswithTerm);
+       const uncheckedCourses = csulaCourseList.filter(
+         (course) => !checkboxResponses[course._id]
+       );
+       console.log("precheck", combinedCourseswithTerm);
+       dispatch(addCourse(combinedCourseswithTerm));
+       console.log("commentedcourses", courses, courses.length);
+   
+       // localStorage.setItem("commentedCourses", JSON.stringify(courses));
+       console.log("Commented courses : ", courses);
+       console.log("start term in ramainingCourseList ", startTerm);
+       console.log("uncheckedCourses" , uncheckedCourses);
+   
+       navigate("/course-selection", {
+         state: {
+           program,
+           startTerm,
+           courseList: uncheckedCourses,
+           startYear,
+         },
+       });
+    }
+
+ 
   };
+
+  useEffect(()=>{
+
+  }, [checkboxResponses]);
   return (
     <>
       <Box>
-        <Typography variant="h5" textTransform={"uppercase"} pt={5}>
+        <Typography variant="h6" textTransform={"uppercase"} pt={5}>
           Please justify relevant work if any
         </Typography>
         <Box px={{ sm: 15, xs: 5 }} py={10}>
@@ -111,11 +151,12 @@ export default function RemainingCourseList(params) {
                   enableCheckbox={true}
                   hoverable={false}
                   course={course}
-                  isChecked={checkboxResponses[course._id]}
-                  //   onCheckboxChange={(isChecked) =>
-                  //     handleCheckboxChange(course._id, isChecked)
-                  //   }
-                  addComment={true}
+                  onCheckboxChange={
+                    handleCheckboxChange
+                  }
+                  addComment={
+                     checkboxResponses[course._id]
+                  }
                   handleUpdateCourse={handleUpdateCourse}
                 />
               </Grid>

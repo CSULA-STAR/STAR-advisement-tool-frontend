@@ -86,11 +86,16 @@ const CourseList = () => {
   };
 
   const handleCheckboxChange = (courseId, isChecked) => {
-    setCheckboxResponses((prevState) => ({
-      ...prevState,
-      [courseId]: isChecked,
-    }));
-  };
+    setCheckboxResponses((prevState) => {
+      // Check if the courseId already exists and if it's not already false
+      const alreadyChecked = prevState[courseId] && prevState[courseId] !== false;
+
+      return {
+        ...prevState,
+        [courseId]: alreadyChecked ? false : isChecked
+      };
+    });
+};
 
   const goToUnselectedCoursesPage = () => {
     const selectedCourses = csulaCourseList.filter(
@@ -125,6 +130,9 @@ const CourseList = () => {
     console.log("csulaCourseList Before sending ", csulaCourseList);
     console.log("startYear", startYear);
 
+    console.log("uncheckedCourses " , uncheckedCourses);
+    console.log("uncheckedMatchedCsulaCourses ", uncheckedMatchedCsulaCourses);
+
     navigate("/justify-unselected", {
       state: {
         program,
@@ -147,7 +155,7 @@ const CourseList = () => {
   return (
     <Box className="course-list-container" component={"div"}>
       <Typography
-        variant="h5"
+        variant="h6"
         padding={"20px 0"}
         textTransform={"uppercase"}
         fontWeight={"600"}
@@ -220,18 +228,16 @@ const CourseList = () => {
                         .map((block) => (
                           <div key={block} className="course-row">
                             <Box className="college-column" width={360}>
-                              <CourseCard
-                                enableCheckbox={true}
-                                hoverable={false}
-                                course={selectedCourse}
-                                isChecked={checkboxResponses[csulaCourse._id]}
-                                onCheckboxChange={(isChecked) =>
-                                  handleCheckboxChange(
-                                    csulaCourse._id,
-                                    isChecked
-                                  )
-                                }
-                              />
+                            <CourseCard
+                             
+                             enableCheckbox={true}
+                             hoverable={false}
+                             course={selectedCourse}
+                             isChecked={checkboxResponses[csulaCourse._id]}
+                             onCheckboxChange={(isChecked) =>
+                               handleCheckboxChange(csulaCourse._id, isChecked)
+                             }
+                            />
                               {(selectedSchoolHeadingRendered = true)}
                             </Box>
                             <div className="arrow-column">
