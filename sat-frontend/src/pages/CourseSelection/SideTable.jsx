@@ -30,13 +30,13 @@ const SideTable = ({ data }) => {
         <TableBody>
           {Object.entries(coursesByTerm).map(([term, courses], index) => (
             <React.Fragment key={index}>
-              <TableRow>
+              <TableRow sx={{ backgroundColor: "#f8f9fa" }}>
                 <TableCell colSpan={2} align="center">
                   <strong>{term}</strong>
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell>
+                <TableCell align="center">
                   {courses.map((course, index) => (
                     <React.Fragment key={index}>
                       <span>{course}</span>

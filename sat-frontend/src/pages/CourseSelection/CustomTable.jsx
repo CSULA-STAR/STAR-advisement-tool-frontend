@@ -1,14 +1,13 @@
-import {
-  Typography
-} from "@mui/material";
+import { Typography } from "@mui/material";
 import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import {
   MaterialReactTable,
-  useMaterialReactTable
+  useMaterialReactTable,
 } from "material-react-table";
 import PropTypes from "prop-types";
 import React from "react";
+
 const CustomTable = ({
   columns,
   data,
@@ -17,24 +16,22 @@ const CustomTable = ({
   filters,
   showAllCourses,
   handleShowAllCourses,
+  handleRowSelectionChange,
 }) => {
   const table = useMaterialReactTable({
     columns,
     data,
     enableRowSelection: true,
-    // enableExpanding: true,
-    muiTableBodyRowProps: ({ row }) => ({
-      onClick: (event) => {
-        console.info(event, row.id);
-      },
-      sx: {
-        cursor: "pointer",
-      },
-    }),
-    getRowId: (row) => row._Id,
+    getRowId: (originalRow) => originalRow._id,
     onRowSelectionChange: setRowSelection,
     state: { rowSelection },
     initialState: {
+      sorting: [
+        {
+          id: columns[0].accessorKe,
+          desc: true,
+        },
+      ],
       pagination: { pageSize: 5, pageIndex: 0 },
       showGlobalFilter: true,
     },
@@ -46,26 +43,14 @@ const CustomTable = ({
     renderEmptyRowsFallback: () => (
       <Typography variant="body1">No courses available</Typography>
     ),
-    muiTableProps: {
-      sx: {
-        border: "1px solid lightgrey",
-        caption: {
-          captionSide: "top",
-        },
+    muiTableBodyRowProps: ({ row }) => ({
+      onClick: (event) => {
+        console.info(event, row.id);
       },
-    },
-    muiTableHeadCellProps: {
       sx: {
-        // border: "1px solid black",
-        fontWeight: "bold",
+        cursor: "pointer",
       },
-    },
-    muiTableBodyCellProps: {
-      sx: {
-        // border: "px solid black",
-      },
-    },
-
+    }),
     renderTopToolbarCustomActions: ({ table }) => (
       <>
         {filters ? (
@@ -83,100 +68,7 @@ const CustomTable = ({
     ),
   });
 
-  return (
-    <>
-      <MaterialReactTable table={table} />
-      {/*
-
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <MRT_GlobalFilterTextField table={table} />
-        {filters ? (
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={showAllCourses}
-                onChange={(e) => handleShowAllCourses(e.target.checked)}
-              />
-            }
-            label="Show all courses"
-          />
-        ) : null}
-      </Box>
-
-      {rows.length > 0 ? (
-        <> 
-        <TableContainer>
-            <Table sx={{ border: "1px solid lightgrey" }}>
-              <TableHead>
-                {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <TableCell align="left" variant="head" key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.Header ??
-                                header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableHead>
-              <TableBody>
-                {rows.map((row, rowIndex) => (
-                  <TableRow key={row.id} selected={row.getIsSelected()}>
-                    {row.getVisibleCells().map((cell, _columnIndex) => (
-                      <TableCell align="left" variant="body" key={cell.id}>
-                        {cell.column.columnDef.accessorKey === "term" ? (
-                          <Stack
-                            sx={{
-                              display: "flex",
-                              flexDirection: "row",
-                              justifyContent: "start",
-                            }}
-                          >
-                            {cell.getValue().map((str, index) => (
-                              <Box
-                                key={index}
-                                sx={{
-                                  border: "1px solid black",
-                                  padding: "3px",
-                                  marginRight: "5px",
-                                }}
-                              >
-                                {abbreviateTerm(str)}
-                              </Box>
-                            ))}
-                          </Stack>
-                        ) : (
-                          <MRT_TableBodyCellValue
-                            cell={cell}
-                            table={table}
-                            staticRowIndex={rowIndex}
-                          />
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <MRT_TablePagination table={table} />
-          </TableContainer> 
-        </>
-      ) : (
-        <Typography variant="body1">No courses available</Typography>
-      )}*/}
-    </>
-  );
+  return <MaterialReactTable table={table} />;
 };
 
 CustomTable.propTypes = {
