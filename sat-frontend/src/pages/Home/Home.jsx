@@ -14,7 +14,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 
 
-const Home = () => {
+const Home = () => { 
   const [college, setCollege] = useState("");
   const [schools, setSchools] = useState([]);
   const [programs, setPrograms] = useState([]);
