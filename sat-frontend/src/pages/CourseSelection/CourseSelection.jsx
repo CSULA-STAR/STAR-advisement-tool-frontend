@@ -54,6 +54,39 @@ const columns = [
       </Stack>
     ),
   },
+  {
+    accessorKey: "pre_requisite.course_code",
+    header: "Requisites",
+    Cell: ({ row }) => {
+      console.log(row.original, row.original.co_requisite.course_code);
+      return (
+        <>
+          {row.original.pre_requisite.length > 0 ? (
+            <Box sx={{ display: "flex" }}>
+              <Typography>PRE: </Typography>
+              {row.original.pre_requisite.course_code.map((code, index) => (
+                <Typography variant="body2" key={index}>
+                  {index > 0 ? ", " : ""}
+                  {code}
+                </Typography>
+              ))}
+            </Box>
+          ) : null}
+          {row.original.co_requisite.course_code.length ? (
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography sx={{ marginRight: "5px" }}>CO:</Typography>
+              {row.original.co_requisite.course_code.map((code, index) => (
+                <Typography variant="body2" key={index}>
+                  {index > 0 ? ", " : ""}
+                  {code}
+                </Typography>
+              ))}
+            </Box>
+          ) : null}
+        </>
+      );
+    },
+  },
 ];
 
 const CourseSelection = () => {
@@ -77,6 +110,8 @@ const CourseSelection = () => {
   const [geRowSelection, setGeRowSelection] = useState({});
   const [currTableData, setCurrTableData] = useState([]);
   const [nonGECourses, setNonGECourses] = useState([]);
+
+  const [navigationHistory, setNavigationHistory] = useState([]);
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -123,7 +158,27 @@ const CourseSelection = () => {
     dataSeperation();
   }, [currentTerm]);
 
-  const handlePreviousClick = () => {};
+  const handlePreviousClick = () => {
+    // Check if there is a previous state in the navigation history
+    console.log("navigationHistory.length", navigationHistory.length);
+    if (navigationHistory.length > 0) {
+      // Pop the last state from the history
+      const prevState = navigationHistory.pop();
+      setCurrentTerm(prevState.term);
+      setCurrentYear(prevState.year);
+      // Navigate back with the previous state
+      navigate("/course-selection", {
+        state: {
+          ...location.state,
+          startTerm: prevState.term,
+          startYear: prevState.year,
+        },
+      });
+      setNavigationCount(navigationCount - 1);
+    } else {
+      window.alert("No previous terms available");
+    }
+  };
   const handleFinishClick = () => {
     navigate("/selected-courses", {
       state: {
@@ -137,6 +192,10 @@ const CourseSelection = () => {
   };
 
   const handleNextClick = async () => {
+    setNavigationHistory([
+      ...navigationHistory,
+      { term: currentTerm, year: currentYear },
+    ]);
     setCurrentTerm(getNextTerm(currentTerm));
     setCurrentYear(currentTerm === "fall" ? currentYear + 1 : currentYear);
 
@@ -154,14 +213,13 @@ const CourseSelection = () => {
 
     const updatedCheckedCourses = checkedCourses.map((course) => ({
       ...course,
+      checked: true,
       selected_term: { term: currentTerm, year: currentYear },
       startYear: startYear,
     }));
-    console.log(
-      "courseListData",
-      courseListData.length,
-      uncheckedCourses.length
-    );
+    // const combinedCourseList = [...updatedCheckedCourses, ...uncheckedCourses];
+
+    console.log("courseListData", courseListData, uncheckedCourses);
     dispatch(addCourse(updatedCheckedCourses));
 
     setRowSelection({});
@@ -292,6 +350,8 @@ const CourseSelection = () => {
               showAllCourses={showAllCourses}
               handleShowAllCourses={handleShowAllCourses}
               handleRowSelectionChange={handleRowSelectionChange}
+              currentTerm={currentTerm}
+              currentYear={currentYear}
             />
           </Box>
           <Stack sx={{ mt: "2rem" }}>
@@ -305,6 +365,8 @@ const CourseSelection = () => {
                     columns={columns}
                     rowSelection={geRowSelection}
                     setRowSelection={setGeRowSelection}
+                    currentTerm={currentTerm}
+                    currentYear={currentYear}
                   />
                 </>
               ) : null}

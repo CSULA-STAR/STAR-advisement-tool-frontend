@@ -53,7 +53,7 @@ const CSULA_Courses = mongoose.model(
       course_code: Array,
       course_name: String,
       department: Array,
-      credits: String,
+      credits: Number,
       category: String,
       block_type: String,
     },
@@ -68,7 +68,7 @@ const Courses = mongoose.model(
       course_code: Array,
       course_name: String,
       department: Array,
-      credits: String,
+      credits: Number,
       category: String,
     },
     { collection: "Courses" }
