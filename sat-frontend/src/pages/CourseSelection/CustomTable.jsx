@@ -22,33 +22,18 @@ const CustomTable = ({
   const [tableData, setTableData] = useState([]);
   const [selectedCourses, setSelectedCourses] = useState([]);
 
-  // const filteredCourses = () => {
-  //   return courses.filter(
-  //     (course) =>
-  //       course.selected_term &&
-  //       course.selected_term.term === currentTerm &&
-  //       course.selected_term.year === currentYear
-  //   );
-  // };
-
-  // useEffect(() => {
-  //   const data = filteredCourses();
-  //   setSelectedCourses(data);
-  // }, [courses, currentTerm, currentYear]);
-
-  // useEffect(() => {
-  //   const selected = {};
-  //   setTableData([...data, ...selectedCourses]);
-  //   courses.forEach((row) => {
-  //     selected[row._id] = row.checked || false;
-  //   });
-  //   setRowSelection(selected);
-  // }, [data, selectedCourses]);
+  useEffect(() => {
+    const selected = {};
+    data.forEach((row) => {
+      selected[row._id] = row?.checked || false;
+    });
+    setRowSelection(selected);
+  }, [data, setRowSelection]);
 
   const table = useMaterialReactTable({
     columns,
     data,
-    enableRowSelection: true,
+    enableRowSelection: (row) => !row.original?.isNewlyAdded,
     getRowId: (row) => row._id,
     onRowSelectionChange: setRowSelection,
     state: { rowSelection },
@@ -67,6 +52,25 @@ const CustomTable = ({
       variant: "outlined",
     },
     paginationDisplayMode: "pages",
+    muiTableBodyCellProps: ({ row }) => {
+      console.log("Row Data:", row);
+      return {
+        sx: {
+          backgroundColor: row?.original?.isNewlyAdded
+            ? "lightgrey"
+            : "inherit",
+        },
+      };
+    },
+    // muiTableBodyRowProps: ({ row }) => {
+    //   console.log("Row Data:", row);
+    //   return {
+    //     sx: {
+    //       backgroundColor: row.isNewlyAdded ? "lightgreen" : "inherit",
+    //     },
+    //   };
+    // },
+
     renderEmptyRowsFallback: () => (
       <Typography variant="body1">No courses available</Typography>
     ),

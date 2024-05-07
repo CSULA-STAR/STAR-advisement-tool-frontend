@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography, TextField } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -19,6 +19,12 @@ const columns = [
   {
     accessorKey: "course_code",
     header: "Course",
+    Cell: ({ cell, row }) => (
+      <Stack>
+        {cell.getValue()}
+        {row.original?.isNewlyAdded ? "(Not Eligible)" : null}
+      </Stack>
+    ),
   },
   {
     accessorKey: "course_name",
@@ -58,23 +64,38 @@ const columns = [
     accessorKey: "pre_requisite.course_code",
     header: "Requisites",
     Cell: ({ row }) => {
-      console.log(row.original, row.original.co_requisite.course_code);
+      console.log("PRE", row.original.pre_requisite);
       return (
         <>
-          {row.original.pre_requisite.length > 0 ? (
-            <Box sx={{ display: "flex" }}>
-              <Typography>PRE: </Typography>
-              {row.original.pre_requisite.course_code.map((code, index) => (
-                <Typography variant="body2" key={index}>
-                  {index > 0 ? ", " : ""}
-                  {code}
-                </Typography>
-              ))}
+          {row.original.pre_requisite.course_code.length ? (
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography
+                fontWeight="bold"
+                variant="body2"
+                sx={{ marginRight: "5px" }}
+              >
+                PRE:{" "}
+              </Typography>
+              {row.original.pre_requisite.course_code.map((code, index) => {
+                console.log("CODEer", code);
+                return (
+                  <Typography variant="body2" key={index}>
+                    {index > 0 ? ", " : ""}
+                    {code}
+                  </Typography>
+                );
+              })}
             </Box>
           ) : null}
           {row.original.co_requisite.course_code.length ? (
             <Box sx={{ display: "flex", alignItems: "center" }}>
-              <Typography sx={{ marginRight: "5px" }}>CO:</Typography>
+              <Typography
+                fontWeight="bold"
+                variant="body2"
+                sx={{ marginRight: "5px" }}
+              >
+                CO:
+              </Typography>
               {row.original.co_requisite.course_code.map((code, index) => (
                 <Typography variant="body2" key={index}>
                   {index > 0 ? ", " : ""}
@@ -86,6 +107,30 @@ const columns = [
         </>
       );
     },
+  },
+  {
+    accessorKey: "comments",
+    header: "Comments",
+    Cell: ({ row }) => (
+      <Stack
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "start",
+        }}
+      >
+        <TextField
+          disabled={!row.original?.isNewlyAdded}
+          id="outlined-basic"
+          label=" Comments"
+          variant="outlined"
+          size="small"
+          onChange={(event) => {
+            row.original.comment = event.target.value;
+          }}
+        />
+      </Stack>
+    ),
   },
 ];
 
@@ -110,7 +155,6 @@ const CourseSelection = () => {
   const [geRowSelection, setGeRowSelection] = useState({});
   const [currTableData, setCurrTableData] = useState([]);
   const [nonGECourses, setNonGECourses] = useState([]);
- 
 
   const [navigationHistory, setNavigationHistory] = useState([]);
 
@@ -121,8 +165,8 @@ const CourseSelection = () => {
           `http://localhost:3001/fetch-req-block-details?dept=${program.department}`
         );
         setDeptBlock(deptBlockResponse.data.blocks);
-        console.log("dept Block ," , deptBlock);
-        console.log("Ex courses : " , exCourses);
+        console.log("dept Block ,", deptBlock);
+        console.log("Ex courses : ", exCourses);
       } catch (error) {
         console.error("Error fetching courses:", error);
       }
@@ -132,10 +176,12 @@ const CourseSelection = () => {
   }, []);
 
   const dataSeperation = () => {
-    const termCourseList = courseListData.filter((course) =>
-      course.term.includes(toSentenceCase(currentTerm))
-    );
-
+    const termCourseList = courseListData
+      .filter((course) => course.term.includes(toSentenceCase(currentTerm)))
+      .filter(
+        (course) => !exCourses.some((exCourse) => exCourse._id === course._id)
+      );
+    console.log("DATAAAA", courseListData, termCourseList);
     const ge_courses = termCourseList.filter(
       (course) => course.course_type === "general_education"
     );
@@ -195,6 +241,7 @@ const CourseSelection = () => {
   };
 
   const handleNextClick = async () => {
+    setShowAllCourses(false);
     setNavigationHistory([
       ...navigationHistory,
       { term: currentTerm, year: currentYear },
@@ -205,7 +252,6 @@ const CourseSelection = () => {
     const mergedSelection = { ...rowSelection, ...geRowSelection };
     const selectedCourseIds = Object.keys(mergedSelection);
     console.log("selectedCourseIds", selectedCourseIds);
-
 
     const checkedCourses = courseListData.filter((course) =>
       selectedCourseIds.includes(course._id)
@@ -248,21 +294,43 @@ const CourseSelection = () => {
 
   const getSelectedBlockIds = () => {
     const selectedBlockIds = exCourses
-      .filter(course => course.course_type === "general_education")
-      .map(course => course.block_type);
-  
+      .filter((course) => course.course_type === "general_education")
+      .map((course) => course.block_type);
+
     return selectedBlockIds;
   };
 
+  // const handleShowAllCourses = (res) => {
+  //   setShowAllCourses(res);
+  //   console.log("termD--2", res);
+  //   if (res) {
+  //     const non_ge_courses = termData.filter(
+  //       (course) => course.course_type !== "general_education"
+  //     );
+  //     setNonGECourses(non_ge_courses);
+  //   } else {
+  //     dataSeperation();
+  //   }
+  // };
+
   const handleShowAllCourses = (res) => {
     setShowAllCourses(res);
-    console.log("termD--2", res);
     if (res) {
-      const non_ge_courses = termData.filter(
-        (course) => course.course_type !== "general_education"
+      const remainingCourses = termData.filter(
+        (course) =>
+          course.course_type !== "general_education" &&
+          !nonGECourses.some(
+            (existingCourse) => existingCourse._id === course._id
+          )
       );
-      setCourseListData(non_ge_courses);
-      setNonGECourses(non_ge_courses);
+      // setCourseListData(non_ge_courses);
+      setNonGECourses([
+        ...nonGECourses,
+        ...remainingCourses.map((course) => ({
+          ...course,
+          isNewlyAdded: true,
+        })),
+      ]);
     } else {
       dataSeperation();
     }
@@ -290,12 +358,15 @@ const CourseSelection = () => {
           sx={{
             border: "1px solid grey",
             p: 2,
-            bgcolor: "background.paper",
             boxShadow: 1,
             borderRadius: 1,
             cursor: "pointer",
-            bgcolor: getSelectedBlockIds().includes(block.block_id) ? "green" : "background.paper",
-            color: getSelectedBlockIds().includes(block.block_id) ? "white" : "black",
+            bgcolor: getSelectedBlockIds().includes(block.block_id)
+              ? "green"
+              : "background.paper",
+            color: getSelectedBlockIds().includes(block.block_id)
+              ? "white"
+              : "black",
           }}
           onClick={() => handleBlockClick(block)}
         >
