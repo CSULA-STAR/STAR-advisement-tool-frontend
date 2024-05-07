@@ -110,6 +110,7 @@ const CourseSelection = () => {
   const [geRowSelection, setGeRowSelection] = useState({});
   const [currTableData, setCurrTableData] = useState([]);
   const [nonGECourses, setNonGECourses] = useState([]);
+ 
 
   const [navigationHistory, setNavigationHistory] = useState([]);
 
@@ -120,6 +121,8 @@ const CourseSelection = () => {
           `http://localhost:3001/fetch-req-block-details?dept=${program.department}`
         );
         setDeptBlock(deptBlockResponse.data.blocks);
+        console.log("dept Block ," , deptBlock);
+        console.log("Ex courses : " , exCourses);
       } catch (error) {
         console.error("Error fetching courses:", error);
       }
@@ -203,6 +206,7 @@ const CourseSelection = () => {
     const selectedCourseIds = Object.keys(mergedSelection);
     console.log("selectedCourseIds", selectedCourseIds);
 
+
     const checkedCourses = courseListData.filter((course) =>
       selectedCourseIds.includes(course._id)
     );
@@ -240,6 +244,14 @@ const CourseSelection = () => {
         },
       });
     }
+  };
+
+  const getSelectedBlockIds = () => {
+    const selectedBlockIds = exCourses
+      .filter(course => course.course_type === "general_education")
+      .map(course => course.block_type);
+  
+    return selectedBlockIds;
   };
 
   const handleShowAllCourses = (res) => {
@@ -282,6 +294,8 @@ const CourseSelection = () => {
             boxShadow: 1,
             borderRadius: 1,
             cursor: "pointer",
+            bgcolor: getSelectedBlockIds().includes(block.block_id) ? "green" : "background.paper",
+            color: getSelectedBlockIds().includes(block.block_id) ? "white" : "black",
           }}
           onClick={() => handleBlockClick(block)}
         >

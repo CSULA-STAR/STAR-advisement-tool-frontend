@@ -14,7 +14,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 
 
-const Home = () => {
+const Home = () => { 
   const [college, setCollege] = useState("");
   const [schools, setSchools] = useState([]);
   const [programs, setPrograms] = useState([]);
@@ -145,7 +145,7 @@ const Home = () => {
       <Box>
         <Stack direction="column" alignItems="center" spacing={2}>
           <Box>
-            <img src="CsulaLogo.jpg" alt="" style={{width:200, height:200}} />
+            <img src="calstatelaLogo.png" alt="" style={{width:150, height:150}} />
           </Box>
           <Typography
             variant="h5"
