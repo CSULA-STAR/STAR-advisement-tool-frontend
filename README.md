@@ -13,7 +13,9 @@ Make sure you have the following installed on your local development environment
 
 - Clone the Repository:
     
-    ``nano``
+    ``git clone https://github.com/pcparagc/CSULA_SAT.git``
+    
+    ``cd sat-frontend ``
 - Install dependencies:
 
     ``npm install``
