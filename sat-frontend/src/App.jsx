@@ -7,6 +7,7 @@ import Home from "./pages/Home/Home";
 import SelectedCourses from "./pages/SelectedCourses/SelectedCourses";
 import RemainingCourseList from "../src/pages/CourseList/RemainingCourseList";
 import store from "./store";
+import CourseTable from "./pages/CourseSelection/CourseTable.jsx";
 
 const App = () => {
   return (
@@ -23,6 +24,7 @@ const App = () => {
               path="/justify-unselected"
               element={<RemainingCourseList />}
             />
+            <Route path="/:blockName" component={CourseTable} />
           </Routes>
         </main>
       </Provider>

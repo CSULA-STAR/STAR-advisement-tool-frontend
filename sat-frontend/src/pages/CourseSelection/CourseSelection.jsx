@@ -1,4 +1,11 @@
-import { Box, Button, Stack, Typography, TextField } from "@mui/material";
+import {
+  Box,
+  Button,
+  Stack,
+  Typography,
+  TextField,
+  Tooltip,
+} from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -76,15 +83,14 @@ const columns = [
               >
                 PRE:{" "}
               </Typography>
-              {row.original.pre_requisite.course_code.map((code, index) => {
-                console.log("CODEer", code);
-                return (
-                  <Typography variant="body2" key={index}>
-                    {index > 0 ? ", " : ""}
-                    {code}
+              {row.original.pre_requisite.course_code.map((code, index) => (
+                <Tooltip key={index} title={code}>
+                  <Typography variant="body2">
+                    {index > 0 && index < 2 ? ", " : ""}
+                    {index < 2 ? code : "."}
                   </Typography>
-                );
-              })}
+                </Tooltip>
+              ))}
             </Box>
           ) : null}
           {row.original.co_requisite.course_code.length ? (
@@ -340,14 +346,27 @@ const CourseSelection = () => {
     setRowSelection(e);
   };
 
+  // const handleBlockClick = (block) => {
+  //   setIsTableVisible(true);
+  //   setCurrTableData({
+  //     title: block.name,
+  //     courses: geCourses.filter(
+  //       (course) => course.block_type == block.block_id
+  //     ),
+  //   });
+  // };
+
   const handleBlockClick = (block) => {
-    setIsTableVisible(true);
-    setCurrTableData({
-      title: block.name,
-      courses: geCourses.filter(
-        (course) => course.block_type == block.block_id
-      ),
-    });
+    // Open a new tab with the block route
+    openNewTabWithBlockRoute(`/${block.block_id}`);
+  };
+
+  const openNewTabWithBlockRoute = (blockRoute) => {
+    const newTab = window.open(blockRoute, "_blank");
+    if (!newTab) {
+      // Handle the case where the new tab could not be opened
+      console.error("Unable to open new tab");
+    }
   };
 
   const renderBlocks = () => (
@@ -420,8 +439,9 @@ const CourseSelection = () => {
       </Stack>
 
       <Stack sx={{ m: "2rem 2rem", display: "flex", flexDirection: "row" }}>
-        <Stack sx={{ flex: "1" }}>
+        <Stack sx={{ flex: "1" }} spacing={2}>
           <SideTable data={exCourses} />
+          <SideTable data={exCourses} type="normal" />
         </Stack>
         <Stack sx={{ flex: "0.5" }}></Stack>
         <Stack sx={{ flex: "5" }}>

@@ -22,13 +22,13 @@ const CustomTable = ({
   const [tableData, setTableData] = useState([]);
   const [selectedCourses, setSelectedCourses] = useState([]);
 
-  useEffect(() => {
-    const selected = {};
-    data.forEach((row) => {
-      selected[row._id] = row?.checked || false;
-    });
-    setRowSelection(selected);
-  }, [data, setRowSelection]);
+  // useEffect(() => {
+  //   const selected = {};
+  //   data.forEach((row) => {
+  //     selected[row._id] = row?.checked || false;
+  //   });
+  //   setRowSelection(selected);
+  // }, []);
 
   const table = useMaterialReactTable({
     columns,
