@@ -120,6 +120,13 @@ export default function RemainingCourseList(params) {
        console.log("Commented courses : ", courses);
        console.log("start term in ramainingCourseList ", startTerm);
        console.log("uncheckedCourses" , uncheckedCourses);
+
+       const updatedCourses = combinedCourseswithTerm.map(course => {
+        return {
+          ...course,
+          selected_term: {term: "Transferable Courses " , year: ""},
+        };
+      });
    
        navigate("/course-selection", {
          state: {
@@ -127,6 +134,7 @@ export default function RemainingCourseList(params) {
            startTerm,
            courseList: uncheckedCourses,
            startYear,
+           prevCourses : updatedCourses
          },
        });
     }
@@ -144,25 +152,31 @@ export default function RemainingCourseList(params) {
           Please justify relevant work if any
         </Typography>
         <Box px={{ sm: 15, xs: 5 }} py={10}>
-          <Grid container spacing={5}>
-            {uncheckedMatchedCsulaCourses.map((course) => (
-              <Grid key={course._id} item xs={6} sm={4}>
-                <CourseCard
-                  enableCheckbox={true}
-                  hoverable={false}
-                  course={course}
-                  onCheckboxChange={
-                    handleCheckboxChange
-                  }
-                  addComment={
-                     checkboxResponses[course._id]
-                  }
-                  handleUpdateCourse={handleUpdateCourse}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
+  <Grid container spacing={5}>
+    {uncheckedMatchedCsulaCourses.length > 0 ? (
+      uncheckedMatchedCsulaCourses.map((course) => (
+        <Grid key={course._id} item xs={6} sm={4}>
+          <CourseCard
+            enableCheckbox={true}
+            hoverable={false}
+            course={course}
+            onCheckboxChange={handleCheckboxChange}
+            addComment={checkboxResponses[course._id]}
+            handleUpdateCourse={handleUpdateCourse}
+          />
+        </Grid>
+      ))
+    ) : (
+      <Box
+      textAlign={'center'}
+      margin="auto"
+      >
+        <h3>No courses available for selection</h3>
+      </Box>
+    )}
+  </Grid>
+</Box>
+
         <div
           className="floating-button"
           style={{

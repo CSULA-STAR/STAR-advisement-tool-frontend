@@ -190,7 +190,7 @@ const CourseList = () => {
                     display: "flex",
                     flextDirection: "row",
                     justifyContent: "space-between",
-                    paddingLeft: 260,
+                    textAlign:"center",
                     margin: "30px 0",
                   }}
                 >
@@ -200,6 +200,7 @@ const CourseList = () => {
                         variant="h6"
                         display={"inline-block"}
                         fontWeight={"bold"}
+                        pl={10}
                       >
                         {college?.name}
                       </Typography>
@@ -207,13 +208,15 @@ const CourseList = () => {
                   </div>
                   <div
                     className="columnCalstate column"
-                    style={{ paddingRight: 280 }}
+                    
                   >
                     {!csulaHeadingRendered && (
                       <Typography
                         variant="h6"
                         display={"inline-block"}
                         fontWeight={"bold"}
+                        
+                        pr={12}
                       >
                         California State University
                       </Typography>

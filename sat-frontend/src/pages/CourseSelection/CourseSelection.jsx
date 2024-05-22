@@ -150,7 +150,7 @@ const CourseSelection = () => {
     location.state.courseList
   );
   const [navigationCount, setNavigationCount] = useState(0);
-  const { startTerm, startYear, program } = location.state || {};
+  const { startTerm, startYear, program, prevCourses } = location.state || {};
   const [geCourses, setGECourses] = useState([]);
   const [isTableVisible, setIsTableVisible] = useState(false);
   const [deptBlock, setDeptBlock] = useState([]);
@@ -173,6 +173,7 @@ const CourseSelection = () => {
         setDeptBlock(deptBlockResponse.data.blocks);
         console.log("dept Block ,", deptBlock);
         console.log("Ex courses : ", exCourses);
+        console.log("prevCourses : ", prevCourses);
       } catch (error) {
         console.error("Error fetching courses:", error);
       }
@@ -440,6 +441,7 @@ const CourseSelection = () => {
 
       <Stack sx={{ m: "2rem 2rem", display: "flex", flexDirection: "row" }}>
         <Stack sx={{ flex: "1" }} spacing={2}>
+          <SideTable data={prevCourses} />
           <SideTable data={exCourses} />
           <SideTable data={exCourses} type="normal" />
         </Stack>
