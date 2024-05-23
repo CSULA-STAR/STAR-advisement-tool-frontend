@@ -23,3 +23,11 @@ export const blocks = [
   "us_history",
   "block_e",
 ];
+
+export const types = {
+  upper_division: "Upper Division",
+  lower_division: "Lower Division",
+  general_education: "General Education",
+  senior_design: "Senior Design",
+  technical_elective: "Technical Elective",
+};

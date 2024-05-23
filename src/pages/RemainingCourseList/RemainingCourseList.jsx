@@ -1,22 +1,18 @@
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import { Button, Grid } from "@mui/material";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { Grid, Button } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import CourseCard from "../../components/CourseCard/CourseCard";
-import "../../pages/CourseSelection/courseSelectionStyle.css";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import { useDispatch } from "react-redux";
 import { addCourse } from "../../slices/selectedCourseSlice";
 
-export default function RemainingCourseList(params) {
+export default function RemainingCourseList() {
   const location = useLocation();
   const dispatch = useDispatch();
-  const [termData, setTermData] = useState([]);
-  const [courseListData, setCourseListData] = useState([]);
   const [checkboxResponses, setCheckboxResponses] = useState({});
   const navigate = useNavigate();
-  const [navigationCount, setNavigationCount] = useState(0);
   const {
     program,
     startTerm,
@@ -24,15 +20,10 @@ export default function RemainingCourseList(params) {
     uncheckedMatchedCsulaCourses,
     csulaCourseList,
   } = location.state || {};
-  const [genEduCourse, setGenEduCourse] = useState([]);
-  const [currentTerm, setCurrentTerm] = useState(startTerm.value);
-  const [currentYear, setCurrentYear] = useState(startYear);
-  const [courseList, setCourseList] = useState(csulaCourseList);
 
   const [courses, setCourses] = useState([]);
 
   const handleUpdateCourse = (updatedCourse) => {
-    console.log("updatedCourse", updatedCourse);
     setCourses((prevCourses) => {
       const index = prevCourses.findIndex(
         (course) => course._id === updatedCourse._id
@@ -49,33 +40,21 @@ export default function RemainingCourseList(params) {
   };
 
   const handleCheckboxChange = (courseId, isChecked) => {
-    console.log("Logging the state of checkbox : ", isChecked);
     setCheckboxResponses((prevState) => ({
       ...prevState,
       [courseId]: isChecked,
     }));
   };
 
-  // 1. Checkbox checked==> enbable add comment
-  // 2. commented courses should added to selected term courses before adding to store
-  // 3. Add validfation to Next button, if any course is selected, it should have a non empty comment
-
   const goToSelectedCoursesPage = () => {
     const selectedCourses = csulaCourseList.filter(
       (course) => checkboxResponses[course._id]
     );
 
-    console.log("selectedCourses ", selectedCourses);
-
     const prevSelectedString = localStorage.getItem("selectedCourses");
     const prevSelectedArray = prevSelectedString
       ? JSON.parse(prevSelectedString)
       : [];
-
-    const selectedCoursesWithTerm = selectedCourses.map((course) => ({
-      ...course,
-      selected_term: {},
-    }));
 
     const commentedCoursesWithTerm = courses.map((course) => ({
       ...course,
@@ -111,24 +90,15 @@ export default function RemainingCourseList(params) {
         );
       }
     } else {
-      console.log("selectedCoursesWithTerm ", selectedCoursesWithTerm);
       const combinedCourseswithTerm = [
         ...prevSelectedArray,
         ...commentedCoursesWithTerm,
       ];
 
-      console.log("combinedCourseswithTerm ", combinedCourseswithTerm);
       const uncheckedCourses = csulaCourseList.filter(
         (course) => !checkboxResponses[course._id]
       );
-      console.log("precheck", combinedCourseswithTerm);
       dispatch(addCourse(combinedCourseswithTerm));
-      console.log("commentedcourses", courses, courses.length);
-
-      // localStorage.setItem("commentedCourses", JSON.stringify(courses));
-      console.log("Commented courses : ", courses);
-      console.log("start term in ramainingCourseList ", startTerm);
-      console.log("uncheckedCourses", uncheckedCourses);
 
       const updatedCourses = combinedCourseswithTerm.map((course) => {
         return {

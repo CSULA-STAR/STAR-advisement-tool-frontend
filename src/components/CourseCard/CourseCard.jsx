@@ -5,13 +5,13 @@ import {
   Card,
   Chip,
   Divider,
-  Stack,
-  Typography,
-  Tooltip,
   Link,
+  Stack,
+  Tooltip,
+  Typography,
 } from "@mui/material";
 import PropTypes from "prop-types";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import CustomModal from "../Modal";
 import "./courseCardStyle.css";
 
@@ -67,8 +67,6 @@ const CourseCard = ({
     setIsHovered(false);
   };
 
-
-
   return (
     <>
       {!compactView ? (
@@ -100,7 +98,9 @@ const CourseCard = ({
                           <Checkbox
                             color="primary"
                             checked={isChecked}
-                            onChange={(e) => onCheckboxChange(course._id, e.target.checked)}
+                            onChange={(e) =>
+                              onCheckboxChange(course._id, e.target.checked)
+                            }
                             gutterBottom
                           />
                         }
@@ -321,6 +321,7 @@ CourseCard.propTypes = {
     term: PropTypes.array,
   }),
   onCheckboxChange: PropTypes.func,
+  handleUpdateCourse: PropTypes.func,
   isChecked: PropTypes.bool.isRequired,
   onCommentClick: PropTypes.func.isRequired,
   addComment: PropTypes.bool,

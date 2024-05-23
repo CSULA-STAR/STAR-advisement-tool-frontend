@@ -10,7 +10,7 @@ const selectedCourseSlice = createSlice({
       state.push(...action.payload);
     },
     removeCourse(state, action) {
-      state = state.filter((course) => course._id === action.payload._id);
+      return state.filter((course) => course._id !== action.payload._id);
     },
     reset: () => initialState,
   },

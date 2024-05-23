@@ -1,26 +1,27 @@
-/* eslint-disable no-unused-vars */
-import * as React from "react";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import PropTypes from "prop-types";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
 
-export default function SelectionDropdown({ label, options, value, onChange }) {
-  console.log("valueee", value);
+export default function SelectionDropdown({
+  label,
+  options,
+  selectedValue,
+  onChange,
+}) {
+  const handleSelectChange = (event) => {
+    const selectedOption = options.find(
+      (option) => option.value === event.target.value
+    );
+    onChange(selectedOption);
+  };
+
   return (
     <FormControl sx={{ m: 1 }} size="small">
       <InputLabel>{label}</InputLabel>
       <Select
         sx={{ width: 300, textAlign: "left" }}
-        value={value}
+        value={selectedValue}
         label={label}
-        onChange={(event) => {
-          const selectedOption = options.find(
-            (option) => option.value === event.target.value
-          );
-          onChange(selectedOption);
-        }}
+        onChange={handleSelectChange}
       >
         {options.map((option) => (
           <MenuItem key={option.value} value={option.value}>
@@ -40,6 +41,6 @@ SelectionDropdown.propTypes = {
       label: PropTypes.string.isRequired,
     })
   ).isRequired,
-  value: PropTypes.any.isRequired,
+  selectedValue: PropTypes.any.isRequired,
   onChange: PropTypes.func.isRequired,
 };

@@ -1,11 +1,9 @@
-import React, { useEffect, useState } from "react";
-import PropTypes from "prop-types";
-import { Typography, Checkbox, FormControlLabel } from "@mui/material";
+import { Checkbox, FormControlLabel, Typography } from "@mui/material";
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { useSelector } from "react-redux";
+import PropTypes from "prop-types";
 
 const CustomTable = ({
   columns,
@@ -15,21 +13,7 @@ const CustomTable = ({
   filters,
   showAllCourses,
   handleShowAllCourses,
-  currentTerm,
-  currentYear,
 }) => {
-  const courses = useSelector((state) => state);
-  const [tableData, setTableData] = useState([]);
-  const [selectedCourses, setSelectedCourses] = useState([]);
-
-  // useEffect(() => {
-  //   const selected = {};
-  //   data.forEach((row) => {
-  //     selected[row._id] = row?.checked || false;
-  //   });
-  //   setRowSelection(selected);
-  // }, []);
-
   const table = useMaterialReactTable({
     columns,
     data,
@@ -52,24 +36,11 @@ const CustomTable = ({
       variant: "outlined",
     },
     paginationDisplayMode: "pages",
-    muiTableBodyCellProps: ({ row }) => {
-      console.log("Row Data:", row);
-      return {
-        sx: {
-          backgroundColor: row?.original?.isNewlyAdded
-            ? "lightgrey"
-            : "inherit",
-        },
-      };
-    },
-    // muiTableBodyRowProps: ({ row }) => {
-    //   console.log("Row Data:", row);
-    //   return {
-    //     sx: {
-    //       backgroundColor: row.isNewlyAdded ? "lightgreen" : "inherit",
-    //     },
-    //   };
-    // },
+    muiTableBodyCellProps: ({ row }) => ({
+      sx: {
+        backgroundColor: row?.original?.isNewlyAdded ? "lightgrey" : "inherit",
+      },
+    }),
 
     renderEmptyRowsFallback: () => (
       <Typography variant="body1">No courses available</Typography>

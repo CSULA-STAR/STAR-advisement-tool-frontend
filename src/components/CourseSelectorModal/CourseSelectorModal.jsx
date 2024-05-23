@@ -1,14 +1,9 @@
-import { Modal, Box, Typography, Paper, Button } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import CourseCard from "../CourseCard";
+import { Box, Button, Modal, Paper, Typography } from "@mui/material";
 import PropTypes from "prop-types";
+import CourseCard from "../CourseCard";
 
-const CourseSelectorModal = ({
-  openModal,
-  handleModalClose,
-  // handleCommentClick,
-  courses,
-}) => {
+const CourseSelectorModal = ({ openModal, handleModalClose, courses }) => {
   const handleCheckboxChange = () => {};
   const handleSubmitClick = () => {};
 

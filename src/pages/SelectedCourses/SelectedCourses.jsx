@@ -1,22 +1,23 @@
+import { Box, IconButton, Typography } from "@mui/material";
 import PrintIcon from "@mui/icons-material/Print";
-import { Box, IconButton, Stack, Typography } from "@mui/material";
+import { useMemo, useRef, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { useReactToPrint } from "react-to-print";
+import PropTypes from "prop-types";
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import PropTypes from "prop-types";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useSelector } from "react-redux";
-import { useReactToPrint } from "react-to-print";
 import "./selectedCoursesStyle.css";
 
 const SelectedCoursesPage = () => {
-  const courses = useSelector((state) => state);
+  const courses = useSelector((state) => state.selectedCourses);
   const [selectedCourses, setSelectedCourses] = useState([]);
   const printRef = useRef(null);
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
   });
+
   useEffect(() => {
     const data = filteredCourses();
     setSelectedCourses(data);
@@ -68,10 +69,10 @@ const SelectedCoursesPage = () => {
           <div>Terms Credits: {cell.getValue()}</div>
         ),
         Footer: () => (
-          <Stack>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
             Total Credits:
             <Box color="warning.main">{totalCredits}</Box>
-          </Stack>
+          </Box>
         ),
       },
       {
@@ -101,7 +102,6 @@ const SelectedCoursesPage = () => {
       density: "spacious",
       expanded: true,
       grouping: ["term"],
-      // sorting: [{ id: "term", desc: false }],
     },
     muiTableContainerProps: { sx: { height: "100%", margin: 0, padding: 0 } },
     muiTableBodyCellProps: ({ row }) => ({
@@ -128,7 +128,6 @@ const SelectedCoursesPage = () => {
         <IconButton onClick={handlePrint}>
           <PrintIcon />
         </IconButton>
-        <Stack justifyContent="center" alignItems="center" padding={3}></Stack>
       </Box>
       <MaterialReactTable className="mr-table" table={table} />
     </Box>
@@ -136,21 +135,7 @@ const SelectedCoursesPage = () => {
 };
 
 SelectedCoursesPage.propTypes = {
-  columns: PropTypes.array,
-  data: PropTypes.array,
-  enableStickyHeader: PropTypes.bool,
-  enableColumnDragging: PropTypes.bool,
-  enableColumnResizing: PropTypes.bool,
-  enableColumnActions: PropTypes.bool,
-  enableTopToolbar: PropTypes.bool,
-  enableBottomToolbar: PropTypes.bool,
-  enablePagination: PropTypes.bool,
-  enableGrouping: PropTypes.bool,
-  groupedColumnMode: PropTypes.string,
-  enableStickyFooter: PropTypes.bool,
-  initialState: PropTypes.object,
-  muiTableContainerProps: PropTypes.object,
-  muiTablePaperProps: PropTypes.object,
+  courses: PropTypes.array.isRequired,
 };
 
 export default SelectedCoursesPage;

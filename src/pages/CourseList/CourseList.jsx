@@ -1,24 +1,17 @@
 import ForwardRoundedIcon from "@mui/icons-material/ForwardRounded";
-import { Box, Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import CourseCard from "../../components/CourseCard/CourseCard";
 import "./CourseListStyle.css";
-import { blocks, block_types } from "../../constants";
+import { blocks, types } from "../../constants";
 import { useDispatch } from "react-redux";
-import { addCourse, reset } from "../../slices/selectedCourseSlice";
+import { reset } from "../../slices/selectedCourseSlice";
+import { addAllCourse } from "../../slices/allCoursesSlice";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 
 const CourseList = () => {
-  const types = {
-    upper_division: "Upper Division",
-    lower_division: "Lower Division",
-    general_education: "General Education",
-    senior_design: "Senior Design",
-    technical_elective: "Technical Elective",
-  };
-
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -26,7 +19,7 @@ const CourseList = () => {
   const [matchedCourses, setMatchedCourses] = useState([]);
   const [csulaCourseList, setCsulaCourseList] = useState([]);
   const [checkboxResponses, setCheckboxResponses] = useState({});
-  const [course_types, setCourseTypes] = useState([]);
+  const [courseTypes, setCourseTypes] = useState([]);
 
   useEffect(() => {
     dispatch(reset());
@@ -39,8 +32,9 @@ const CourseList = () => {
           const csulaResponse = await axios.get(
             `http://localhost:3001/fetch-all-csula-courses?dept=${program.department}`
           );
-          let filteredCourses = csulaResponse.data.filter((course) => course);
+          const filteredCourses = csulaResponse.data.filter((course) => course);
           setCsulaCourseList(filteredCourses);
+
           const selectedSchoolResponse = await axios.get(
             `http://localhost:3001/fetch-courses?sid=${college.id}`
           );
@@ -50,11 +44,14 @@ const CourseList = () => {
 
           const idsArray = typesResponse.data[0].types.map((type) => type.id);
           setCourseTypes(idsArray);
+
           const { matched } = findMatchingCourses(
             csulaResponse.data,
             selectedSchoolResponse.data
           );
+          dispatch(addAllCourse(filteredCourses));
           setMatchedCourses(matched);
+
           const initialCheckboxResponses = {};
           matched.forEach(({ csulaCourse }) => {
             initialCheckboxResponses[csulaCourse._id] = false;
@@ -67,7 +64,7 @@ const CourseList = () => {
 
       fetchCourses();
     }
-  }, [program, college]);
+  }, [program, college, dispatch]);
 
   const findMatchingCourses = (csulaCourses, selectedSchoolCourses) => {
     const matched = [];
@@ -86,23 +83,16 @@ const CourseList = () => {
   };
 
   const handleCheckboxChange = (courseId, isChecked) => {
-    setCheckboxResponses((prevState) => {
-      // Check if the courseId already exists and if it's not already false
-      const alreadyChecked = prevState[courseId] && prevState[courseId] !== false;
-
-      return {
-        ...prevState,
-        [courseId]: alreadyChecked ? false : isChecked
-      };
-    });
-};
+    setCheckboxResponses((prevState) => ({
+      ...prevState,
+      [courseId]: isChecked,
+    }));
+  };
 
   const goToUnselectedCoursesPage = () => {
     const selectedCourses = csulaCourseList.filter(
       (course) => checkboxResponses[course._id]
     );
-
-    console.log("Checkbox responses : ", checkboxResponses);
 
     const selectedCoursesWithTerm = selectedCourses.map((course) => ({
       ...course,
@@ -117,21 +107,10 @@ const CourseList = () => {
       .filter(({ csulaCourse }) => !checkboxResponses[csulaCourse._id])
       .map(({ csulaCourse }) => csulaCourse);
 
-    console.log("uncheckedMatchedCsulaCourses ", uncheckedMatchedCsulaCourses);
-    console.log(" uncheckedCourses : ", uncheckedCourses);
-
-    console.log("Selected courses for localStorage ", selectedCoursesWithTerm);
-
     localStorage.setItem(
       "selectedCourses",
       JSON.stringify(selectedCoursesWithTerm)
     );
-
-    console.log("csulaCourseList Before sending ", csulaCourseList);
-    console.log("startYear", startYear);
-
-    console.log("uncheckedCourses " , uncheckedCourses);
-    console.log("uncheckedMatchedCsulaCourses ", uncheckedMatchedCsulaCourses);
 
     navigate("/justify-unselected", {
       state: {
@@ -139,8 +118,8 @@ const CourseList = () => {
         startTerm,
         courseList: uncheckedCourses,
         startYear: startYear.value,
-        uncheckedMatchedCsulaCourses: uncheckedMatchedCsulaCourses,
-        csulaCourseList: csulaCourseList,
+        uncheckedMatchedCsulaCourses,
+        csulaCourseList,
       },
     });
   };
@@ -153,33 +132,33 @@ const CourseList = () => {
   let csulaHeadingRendered = false;
 
   return (
-    <Box className="course-list-container" component={"div"}>
+    <Box className="course-list-container" component="div">
       <Typography
         variant="h6"
-        padding={"20px 0"}
-        textTransform={"uppercase"}
-        fontWeight={"600"}
+        padding="20px 0"
+        textTransform="uppercase"
+        fontWeight="600"
       >
         Please select the courses you have taken in {college.name}
       </Typography>
-      {course_types.map((course_type) => {
+      {courseTypes.map((courseType) => {
         const matchedForThisType = matchedCourses.filter(
-          ({ csulaCourse }) => csulaCourse.course_type === course_type
+          ({ csulaCourse }) => csulaCourse.course_type === courseType
         );
 
         return matchedForThisType.length > 0 ? (
-          <Box key={course_type}>
+          <Box key={courseType}>
             <div
               className="course_type"
               style={{
                 display: "flex",
                 textAlign: "center",
                 justifyContent: "center",
-                alignItem: "center",
+                alignItems: "center",
               }}
             >
-              <Typography variant="h5" paddingTop={"auto"}>
-                {types[course_type]}
+              <Typography variant="h5" paddingTop="auto">
+                {types[courseType]}
               </Typography>
             </div>
             <Box className="course-group">
@@ -188,9 +167,9 @@ const CourseList = () => {
                   className="row"
                   style={{
                     display: "flex",
-                    flextDirection: "row",
+                    flexDirection: "row",
                     justifyContent: "space-between",
-                    textAlign:"center",
+                    textAlign: "center",
                     margin: "30px 0",
                   }}
                 >
@@ -198,24 +177,20 @@ const CourseList = () => {
                     {!selectedSchoolHeadingRendered && (
                       <Typography
                         variant="h6"
-                        display={"inline-block"}
-                        fontWeight={"bold"}
+                        display="inline-block"
+                        fontWeight="bold"
                         pl={10}
                       >
                         {college?.name}
                       </Typography>
                     )}
                   </div>
-                  <div
-                    className="columnCalstate column"
-                    
-                  >
+                  <div className="columnCalstate column">
                     {!csulaHeadingRendered && (
                       <Typography
                         variant="h6"
-                        display={"inline-block"}
-                        fontWeight={"bold"}
-                        
+                        display="inline-block"
+                        fontWeight="bold"
                         pr={12}
                       >
                         California State University
@@ -231,16 +206,18 @@ const CourseList = () => {
                         .map((block) => (
                           <div key={block} className="course-row">
                             <Box className="college-column" width={360}>
-                            <CourseCard
-                             
-                             enableCheckbox={true}
-                             hoverable={false}
-                             course={selectedCourse}
-                             isChecked={checkboxResponses[csulaCourse._id]}
-                             onCheckboxChange={(isChecked) =>
-                               handleCheckboxChange(csulaCourse._id, isChecked)
-                             }
-                            />
+                              <CourseCard
+                                enableCheckbox
+                                hoverable={false}
+                                course={selectedCourse}
+                                isChecked={checkboxResponses[csulaCourse._id]}
+                                onCheckboxChange={(isChecked) =>
+                                  handleCheckboxChange(
+                                    csulaCourse._id,
+                                    isChecked
+                                  )
+                                }
+                              />
                               {(selectedSchoolHeadingRendered = true)}
                             </Box>
                             <div className="arrow-column">
@@ -272,14 +249,14 @@ const CourseList = () => {
                           {!selectedSchoolHeadingRendered && (
                             <Typography
                               variant="h6"
-                              textAlign={"center"}
-                              padding={"20px 0"}
+                              textAlign="center"
+                              padding="20px 0"
                             >
                               {college?.name}
                             </Typography>
                           )}
                           <CourseCard
-                            enableCheckbox={true}
+                            enableCheckbox
                             hoverable={false}
                             course={selectedCourse}
                             isChecked={checkboxResponses[csulaCourse._id]}
@@ -307,8 +284,8 @@ const CourseList = () => {
                           {!csulaHeadingRendered && (
                             <Typography
                               variant="h6"
-                              textAlign={"center"}
-                              padding={"20px 0"}
+                              textAlign="center"
+                              padding="20px 0"
                             >
                               Cal State LA Courses
                             </Typography>
@@ -334,9 +311,9 @@ const CourseList = () => {
           onClick={goToUnselectedCoursesPage}
           style={{ backgroundColor: "#FFCE00", borderRadius: 7 }}
         >
-          <Typography variant="p" px={5} textTransform={"none"} fontSize={16}>
+          <Typography variant="p" px={5} textTransform="none" fontSize={16}>
             Next
-          </Typography>{" "}
+          </Typography>
           <NavigateNextIcon />
         </Button>
       </div>

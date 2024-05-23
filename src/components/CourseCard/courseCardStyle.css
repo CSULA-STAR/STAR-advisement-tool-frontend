@@ -4,6 +4,7 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
+
 .ellipsis {
   overflow: hidden;
   display: -webkit-box;
@@ -12,20 +13,21 @@
 }
 
 @media only screen and (max-width: 600px) {
-  .course_card{
+  .course_card {
     width: 150px;
-   
     height: 100px;
   }
-  .course-row{
+
+  .course-row {
     width: 100vw;
-   
   }
-  .course-name{
+
+  .course-name {
     font-size: 12px !important;
   }
 
-  .course-code , .credits{
+  .course-code,
+  .credits {
     font-size: 12px !important;
   }
 }

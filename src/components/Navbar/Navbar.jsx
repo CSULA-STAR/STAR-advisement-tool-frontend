@@ -16,24 +16,9 @@ const Navbar = () => {
                 Home
               </NavLink>
             </li>
-
-            {/* <li className="nav__item">
-              <NavLink to="/nav1" className="nav__link">
-                Nav 1
-              </NavLink>
-            </li> */}
-            {/* <li className="nav__item">
-              <NavLink to="/login" className="nav__link nav__cta">
-                Login
-              </NavLink>
-            </li> */}
           </ul>
-          <div className="nav__close" id="nav-close">
-            {/* <IoClose /> */}
-          </div>
-          <div className="nav__toggle" id="nav-toggle">
-            {/* <IoMenu /> */}
-          </div>
+          <div className="nav__close" id="nav-close"></div>
+          <div className="nav__toggle" id="nav-toggle"></div>
         </div>
       </nav>
     </header>

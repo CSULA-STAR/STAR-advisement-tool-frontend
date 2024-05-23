@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
-import { Paper } from "@mui/material";
 import CourseCard from "../CourseCard/CourseCard";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -25,20 +25,13 @@ export default function BlockModal({
   data,
   block,
   handleCheckboxChange,
-  enableCheckbox,
   checkboxResponses,
 }) {
   const [open, setOpen] = useState(false);
-  const handleOpen = () => {
-    setOpen(true);
-  };
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
-  const handleOk = () => {
-    setOpen(false);
-  };
+  const handleOk = () => setOpen(false);
 
   return (
     <>
@@ -52,7 +45,7 @@ export default function BlockModal({
           borderRadius: 7,
         }}
       >
-        <strong> {block}</strong>
+        <strong>{block}</strong>
       </Button>
       <Modal
         open={open}
@@ -60,7 +53,7 @@ export default function BlockModal({
         aria-labelledby="parent-modal-title"
         aria-describedby="parent-modal-description"
       >
-        <Box sx={{ ...style, width: "90%", height: "90%" }}>
+        <Box sx={style}>
           <Button
             onClick={handleClose}
             style={{ position: "absolute", right: 10, top: 10, color: "black" }}
@@ -103,3 +96,10 @@ export default function BlockModal({
     </>
   );
 }
+
+BlockModal.propTypes = {
+  data: PropTypes.array.isRequired,
+  block: PropTypes.string.isRequired,
+  handleCheckboxChange: PropTypes.func.isRequired,
+  checkboxResponses: PropTypes.object.isRequired,
+};

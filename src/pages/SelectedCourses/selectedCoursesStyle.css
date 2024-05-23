@@ -7,7 +7,6 @@
   overflow-x: unset !important;
   max-height: none !important;
   margin: 10px !important;
-  /* Adjusted margin */
 }
 
 .MuiTableContainer-root {
@@ -15,19 +14,12 @@
 }
 
 @media print {
-
-  .table-heading {
-    /* display: none !important; */
-    /* Hide the heading in print */
-  }
-
   .table-container {
     page-break-inside: avoid;
   }
 
   .mr-table {
     display: block !important;
-    /* Ensure the table is block-level */
     visibility: visible !important;
   }
 

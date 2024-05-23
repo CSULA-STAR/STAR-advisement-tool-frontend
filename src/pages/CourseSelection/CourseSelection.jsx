@@ -5,6 +5,7 @@ import {
   Typography,
   TextField,
   Tooltip,
+  Link,
 } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
@@ -72,7 +73,6 @@ const columns = [
     accessorKey: "pre_requisite.course_code",
     header: "Requisites",
     Cell: ({ row }) => {
-      console.log("PRE", row.original.pre_requisite);
       return (
         <>
           {row.original.pre_requisite.course_code.length ? (
@@ -144,7 +144,8 @@ const columns = [
 const CourseSelection = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const exCourses = useSelector((state) => state);
+  const selectedCourses = useSelector((state) => state.selectedCourses);
+  const allCourses = useSelector((state) => state.allCourses);
   const dispatch = useDispatch();
   const [termData, setTermData] = useState([]);
   const [courseListData, setCourseListData] = useState(
@@ -190,22 +191,33 @@ const CourseSelection = () => {
     const termCourseList = courseListData
       .filter((course) => course.term.includes(toSentenceCase(currentTerm)))
       .filter(
-        (course) => !exCourses.some((exCourse) => exCourse._id === course._id)
+        (course) =>
+          !selectedCourses.some((exCourse) => exCourse._id === course._id)
       );
     const ge_courses = termCourseList.filter(
       (course) => course.course_type === "general_education"
     );
-    const non_ge_courses = termCourseList.filter(
-      (course) =>
-        course.course_type !== "general_education" &&
-        (course.pre_requisite.course_code.length === 0 ||
-          course.pre_requisite.course_code.some((code) =>
-            exCourses.some((selectedCourse) =>
-              selectedCourse.course_code.includes(code)
-            )
-          ))
-    );
-    console.log("termD--1", non_ge_courses.length);
+    const non_ge_courses = termCourseList.filter((course) => {
+      if (course.course_type === "general_education") return false;
+
+      const hasPrerequisite =
+        course.pre_requisite.course_code.length === 0 ||
+        course.pre_requisite.course_code.some((code) =>
+          selectedCourses.some((selectedCourse) =>
+            selectedCourse.course_code.includes(code)
+          )
+        );
+
+      const hasCorequisite =
+        course.co_requisite.course_code.length === 0 ||
+        course.co_requisite.course_code.some((code) =>
+          selectedCourses.some((selectedCourse) =>
+            selectedCourse.course_code.includes(code)
+          )
+        );
+
+      return hasPrerequisite && hasCorequisite;
+    });
 
     setNonGECourses(non_ge_courses);
     setGECourses(ge_courses);
@@ -218,7 +230,6 @@ const CourseSelection = () => {
   }, [currentTerm]);
 
   const handlePreviousClick = () => {
-    console.log("navigationHistory.length", navigationHistory.length);
     if (navigationHistory.length > 0) {
       const prevState = navigationHistory.pop();
       setCurrentTerm(prevState.term);
@@ -238,7 +249,7 @@ const CourseSelection = () => {
   const handleFinishClick = () => {
     navigate("/selected-courses", {
       state: {
-        courseList: exCourses,
+        courseList: selectedCourses,
         startTerm,
         startYear,
         endTerm: currentTerm,
@@ -258,7 +269,6 @@ const CourseSelection = () => {
 
     const mergedSelection = { ...rowSelection, ...geRowSelection };
     const selectedCourseIds = Object.keys(mergedSelection);
-    console.log("selectedCourseIds", selectedCourseIds);
 
     const checkedCourses = courseListData.filter((course) =>
       selectedCourseIds.includes(course._id)
@@ -274,11 +284,7 @@ const CourseSelection = () => {
       selected_term: { term: currentTerm, year: currentYear },
       startYear: startYear,
     }));
-    // const combinedCourseList = [...updatedCheckedCourses, ...uncheckedCourses];
-
-    console.log("courseListData", courseListData, uncheckedCourses);
     dispatch(addCourse(updatedCheckedCourses));
-
     setRowSelection({});
     setGeRowSelection({});
 
@@ -300,25 +306,12 @@ const CourseSelection = () => {
   };
 
   const getSelectedBlockIds = () => {
-    const selectedBlockIds = exCourses
+    const selectedBlockIds = selectedCourses
       .filter((course) => course.course_type === "general_education")
       .map((course) => course.block_type);
 
     return selectedBlockIds;
   };
-
-  // const handleShowAllCourses = (res) => {
-  //   setShowAllCourses(res);
-  //   console.log("termD--2", res);
-  //   if (res) {
-  //     const non_ge_courses = termData.filter(
-  //       (course) => course.course_type !== "general_education"
-  //     );
-  //     setNonGECourses(non_ge_courses);
-  //   } else {
-  //     dataSeperation();
-  //   }
-  // };
 
   const handleShowAllCourses = (res) => {
     setShowAllCourses(res);
@@ -366,9 +359,18 @@ const CourseSelection = () => {
   };
 
   const openNewTabWithData = async (block) => {
-    const tableData = await courseListData.filter(
-      (course) => course.course_type === block.id
-    );
+    const tableData = allCourses
+      .filter((course) => course.course_type === block.id)
+      .map((course) => ({
+        ...course,
+        isSelected: selectedCourses.some(
+          (selectedCourse) => selectedCourse._id === course._id
+        ),
+        selected_term:
+          selectedCourses.find(
+            (selectedCourse) => selectedCourse._id === course._id
+          )?.selected_term || null,
+      }));
     NewTabTable(tableData);
   };
 
@@ -394,37 +396,50 @@ const CourseSelection = () => {
 
   const renderGEBlocks = () => {
     return (
-      <Stack direction="row" spacing={2}>
-        {deptBlock.map((block, index) => (
-          <Box
-            key={index}
-            sx={{
-              border: "1px solid grey",
-              p: 2,
-              boxShadow: 1,
-              borderRadius: 1,
-              cursor: "pointer",
-              bgcolor: getSelectedBlockIds().includes(block.block_id)
-                ? "green"
-                : "background.paper",
-              color: getSelectedBlockIds().includes(block.block_id)
-                ? "white"
-                : "black",
-            }}
-            onClick={() => handleGEBlockClick(block)}
-          >
-            <Typography
-              sx={{ fontWeight: "bold" }}
-              variant="subtitle2"
-              component="div"
+      <Stack sx={{ textAlign: "left" }}>
+        <Link
+          onClick={() =>
+            openNewTabWithData({
+              id: "general_education",
+              name: "General Education",
+            })
+          }
+          sx={{ cursor: "pointer", textDecoration: "none" }}
+        >
+          Show All GE Courses
+        </Link>
+        <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
+          {deptBlock.map((block, index) => (
+            <Box
+              key={index}
+              sx={{
+                border: "1px solid grey",
+                p: 2,
+                boxShadow: 1,
+                borderRadius: 1,
+                cursor: "pointer",
+                bgcolor: getSelectedBlockIds().includes(block.block_id)
+                  ? "green"
+                  : "background.paper",
+                color: getSelectedBlockIds().includes(block.block_id)
+                  ? "white"
+                  : "black",
+              }}
+              onClick={() => handleGEBlockClick(block)}
             >
-              GE
-            </Typography>
-            <Typography variant="body" component="div">
-              {block.name}
-            </Typography>
-          </Box>
-        ))}
+              <Typography
+                sx={{ fontWeight: "bold" }}
+                variant="subtitle2"
+                component="div"
+              >
+                GE
+              </Typography>
+              <Typography variant="body" component="div">
+                {block.name}
+              </Typography>
+            </Box>
+          ))}
+        </Stack>
       </Stack>
     );
   };
@@ -465,7 +480,7 @@ const CourseSelection = () => {
 
       <Stack sx={{ m: "2rem 2rem", display: "flex", flexDirection: "row" }}>
         <Stack sx={{ flex: "1" }} spacing={2}>
-          <SideTable data={exCourses} />
+          <SideTable data={selectedCourses} />
           <SideTable data={prevCourses} />
         </Stack>
         <Stack sx={{ flex: "0.5" }}></Stack>
