@@ -1,4 +1,3 @@
-
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { Grid, Button } from "@mui/material";
@@ -30,8 +29,6 @@ export default function RemainingCourseList(params) {
   const [currentYear, setCurrentYear] = useState(startYear);
   const [courseList, setCourseList] = useState(csulaCourseList);
 
-  
-
   const [courses, setCourses] = useState([]);
 
   const handleUpdateCourse = (updatedCourse) => {
@@ -51,10 +48,8 @@ export default function RemainingCourseList(params) {
     });
   };
 
-
-
   const handleCheckboxChange = (courseId, isChecked) => {
-    console.log("Logging the state of checkbox : " , isChecked);
+    console.log("Logging the state of checkbox : ", isChecked);
     setCheckboxResponses((prevState) => ({
       ...prevState,
       [courseId]: isChecked,
@@ -70,10 +65,12 @@ export default function RemainingCourseList(params) {
       (course) => checkboxResponses[course._id]
     );
 
-    console.log("selectedCourses " , selectedCourses);
+    console.log("selectedCourses ", selectedCourses);
 
     const prevSelectedString = localStorage.getItem("selectedCourses");
-    const prevSelectedArray = prevSelectedString ? JSON.parse(prevSelectedString) : [];
+    const prevSelectedArray = prevSelectedString
+      ? JSON.parse(prevSelectedString)
+      : [];
 
     const selectedCoursesWithTerm = selectedCourses.map((course) => ({
       ...course,
@@ -85,66 +82,74 @@ export default function RemainingCourseList(params) {
       selected_term: {},
     }));
 
-    
     //Comment Validations
     const allCoursesCommented = selectedCourses.every((course) => {
-      const courseToCheck = commentedCoursesWithTerm.find((commentedCourse) => commentedCourse._id === course._id);
-      return courseToCheck && courseToCheck.comment && courseToCheck.comment.trim() !== "";
-    })
-    
+      const courseToCheck = commentedCoursesWithTerm.find(
+        (commentedCourse) => commentedCourse._id === course._id
+      );
+      return (
+        courseToCheck &&
+        courseToCheck.comment &&
+        courseToCheck.comment.trim() !== ""
+      );
+    });
+
     if (!allCoursesCommented) {
       const courseWithoutComment = selectedCourses.find((course) => {
-        const courseToCheck = commentedCoursesWithTerm.find((commentedCourse) => commentedCourse._id === course._id);
-        return !courseToCheck || !courseToCheck.comment || courseToCheck.comment.trim() === "";
-      })
+        const courseToCheck = commentedCoursesWithTerm.find(
+          (commentedCourse) => commentedCourse._id === course._id
+        );
+        return (
+          !courseToCheck ||
+          !courseToCheck.comment ||
+          courseToCheck.comment.trim() === ""
+        );
+      });
       if (courseWithoutComment) {
-        alert(`Please provide a valid comment for ${courseWithoutComment.course_name}`);
+        alert(
+          `Please provide a valid comment for ${courseWithoutComment.course_name}`
+        );
       }
-     
-    }
+    } else {
+      console.log("selectedCoursesWithTerm ", selectedCoursesWithTerm);
+      const combinedCourseswithTerm = [
+        ...prevSelectedArray,
+        ...commentedCoursesWithTerm,
+      ];
 
-    else{
-      console.log("selectedCoursesWithTerm " , selectedCoursesWithTerm);
-      const combinedCourseswithTerm = [...prevSelectedArray, ...commentedCoursesWithTerm];
-       
-   
-     console.log("combinedCourseswithTerm " , combinedCourseswithTerm);
-       const uncheckedCourses = csulaCourseList.filter(
-         (course) => !checkboxResponses[course._id]
-       );
-       console.log("precheck", combinedCourseswithTerm);
-       dispatch(addCourse(combinedCourseswithTerm));
-       console.log("commentedcourses", courses, courses.length);
-   
-       // localStorage.setItem("commentedCourses", JSON.stringify(courses));
-       console.log("Commented courses : ", courses);
-       console.log("start term in ramainingCourseList ", startTerm);
-       console.log("uncheckedCourses" , uncheckedCourses);
+      console.log("combinedCourseswithTerm ", combinedCourseswithTerm);
+      const uncheckedCourses = csulaCourseList.filter(
+        (course) => !checkboxResponses[course._id]
+      );
+      console.log("precheck", combinedCourseswithTerm);
+      dispatch(addCourse(combinedCourseswithTerm));
+      console.log("commentedcourses", courses, courses.length);
 
-       const updatedCourses = combinedCourseswithTerm.map(course => {
+      // localStorage.setItem("commentedCourses", JSON.stringify(courses));
+      console.log("Commented courses : ", courses);
+      console.log("start term in ramainingCourseList ", startTerm);
+      console.log("uncheckedCourses", uncheckedCourses);
+
+      const updatedCourses = combinedCourseswithTerm.map((course) => {
         return {
           ...course,
-          selected_term: {term: "Transferable Courses " , year: ""},
+          selected_term: { term: "Transferable Courses ", year: "" },
         };
       });
-   
-       navigate("/course-selection", {
-         state: {
-           program,
-           startTerm,
-           courseList: uncheckedCourses,
-           startYear,
-           prevCourses : updatedCourses
-         },
-       });
-    }
 
- 
+      navigate("/course-selection", {
+        state: {
+          program,
+          startTerm,
+          courseList: uncheckedCourses,
+          startYear,
+          prevCourses: updatedCourses,
+        },
+      });
+    }
   };
 
-  useEffect(()=>{
-
-  }, [checkboxResponses]);
+  useEffect(() => {}, [checkboxResponses]);
   return (
     <>
       <Box>
@@ -152,30 +157,27 @@ export default function RemainingCourseList(params) {
           Please justify relevant work if any
         </Typography>
         <Box px={{ sm: 15, xs: 5 }} py={10}>
-  <Grid container spacing={5}>
-    {uncheckedMatchedCsulaCourses.length > 0 ? (
-      uncheckedMatchedCsulaCourses.map((course) => (
-        <Grid key={course._id} item xs={6} sm={4}>
-          <CourseCard
-            enableCheckbox={true}
-            hoverable={false}
-            course={course}
-            onCheckboxChange={handleCheckboxChange}
-            addComment={checkboxResponses[course._id]}
-            handleUpdateCourse={handleUpdateCourse}
-          />
-        </Grid>
-      ))
-    ) : (
-      <Box
-      textAlign={'center'}
-      margin="auto"
-      >
-        <h3>No courses available for selection</h3>
-      </Box>
-    )}
-  </Grid>
-</Box>
+          <Grid container spacing={5}>
+            {uncheckedMatchedCsulaCourses.length > 0 ? (
+              uncheckedMatchedCsulaCourses.map((course) => (
+                <Grid key={course._id} item xs={6} sm={4}>
+                  <CourseCard
+                    enableCheckbox={true}
+                    hoverable={false}
+                    course={course}
+                    onCheckboxChange={handleCheckboxChange}
+                    addComment={checkboxResponses[course._id]}
+                    handleUpdateCourse={handleUpdateCourse}
+                  />
+                </Grid>
+              ))
+            ) : (
+              <Box textAlign={"center"} margin="auto">
+                <h3>No courses available for selection</h3>
+              </Box>
+            )}
+          </Grid>
+        </Box>
 
         <div
           className="floating-button"

@@ -21,6 +21,7 @@ import "./courseSelectionStyle.css";
 
 import CustomTable from "./CustomTable";
 import SideTable from "./SideTable";
+import NewTabTable from "./NewTabTable";
 
 const columns = [
   {
@@ -151,6 +152,7 @@ const CourseSelection = () => {
   );
   const [navigationCount, setNavigationCount] = useState(0);
   const { startTerm, startYear, program, prevCourses } = location.state || {};
+  const [courseTypes, setCourseTypes] = useState([]);
   const [geCourses, setGECourses] = useState([]);
   const [isTableVisible, setIsTableVisible] = useState(false);
   const [deptBlock, setDeptBlock] = useState([]);
@@ -161,6 +163,7 @@ const CourseSelection = () => {
   const [geRowSelection, setGeRowSelection] = useState({});
   const [currTableData, setCurrTableData] = useState([]);
   const [nonGECourses, setNonGECourses] = useState([]);
+  const [isGEBlockVisible, setIsGEBlockVisible] = useState(false);
 
   const [navigationHistory, setNavigationHistory] = useState([]);
 
@@ -170,10 +173,11 @@ const CourseSelection = () => {
         const deptBlockResponse = await axios.get(
           `http://localhost:3001/fetch-req-block-details?dept=${program.department}`
         );
+        const deptCourseTypes = await axios.get(
+          `http://localhost:3001/course-types`
+        );
+        setCourseTypes(deptCourseTypes.data[0].types);
         setDeptBlock(deptBlockResponse.data.blocks);
-        console.log("dept Block ,", deptBlock);
-        console.log("Ex courses : ", exCourses);
-        console.log("prevCourses : ", prevCourses);
       } catch (error) {
         console.error("Error fetching courses:", error);
       }
@@ -188,7 +192,6 @@ const CourseSelection = () => {
       .filter(
         (course) => !exCourses.some((exCourse) => exCourse._id === course._id)
       );
-    console.log("DATAAAA", courseListData, termCourseList);
     const ge_courses = termCourseList.filter(
       (course) => course.course_type === "general_education"
     );
@@ -215,14 +218,11 @@ const CourseSelection = () => {
   }, [currentTerm]);
 
   const handlePreviousClick = () => {
-    // Check if there is a previous state in the navigation history
     console.log("navigationHistory.length", navigationHistory.length);
     if (navigationHistory.length > 0) {
-      // Pop the last state from the history
       const prevState = navigationHistory.pop();
       setCurrentTerm(prevState.term);
       setCurrentYear(prevState.year);
-      // Navigate back with the previous state
       navigate("/course-selection", {
         state: {
           ...location.state,
@@ -347,32 +347,34 @@ const CourseSelection = () => {
     setRowSelection(e);
   };
 
-  // const handleBlockClick = (block) => {
-  //   setIsTableVisible(true);
-  //   setCurrTableData({
-  //     title: block.name,
-  //     courses: geCourses.filter(
-  //       (course) => course.block_type == block.block_id
-  //     ),
-  //   });
-  // };
-
-  const handleBlockClick = (block) => {
-    // Open a new tab with the block route
-    openNewTabWithBlockRoute(`/${block.block_id}`);
+  const handleGEBlockClick = (block) => {
+    setIsTableVisible(true);
+    setCurrTableData({
+      title: block.name,
+      courses: geCourses.filter(
+        (course) => course.block_type == block.block_id
+      ),
+    });
   };
 
-  const openNewTabWithBlockRoute = (blockRoute) => {
-    const newTab = window.open(blockRoute, "_blank");
-    if (!newTab) {
-      // Handle the case where the new tab could not be opened
-      console.error("Unable to open new tab");
+  const handleBlockClick = (block) => {
+    if (block.id === "general_education") {
+      setIsGEBlockVisible(true);
+    } else {
+      openNewTabWithData(block);
     }
+  };
+
+  const openNewTabWithData = async (block) => {
+    const tableData = await courseListData.filter(
+      (course) => course.course_type === block.id
+    );
+    NewTabTable(tableData);
   };
 
   const renderBlocks = () => (
     <Stack direction="row" spacing={2}>
-      {deptBlock.map((block, index) => (
+      {courseTypes.map((item, index) => (
         <Box
           key={index}
           sx={{
@@ -381,29 +383,51 @@ const CourseSelection = () => {
             boxShadow: 1,
             borderRadius: 1,
             cursor: "pointer",
-            bgcolor: getSelectedBlockIds().includes(block.block_id)
-              ? "green"
-              : "background.paper",
-            color: getSelectedBlockIds().includes(block.block_id)
-              ? "white"
-              : "black",
           }}
-          onClick={() => handleBlockClick(block)}
+          onClick={() => handleBlockClick(item)}
         >
-          <Typography
-            sx={{ fontWeight: "bold" }}
-            variant="subtitle2"
-            component="div"
-          >
-            GE
-          </Typography>
-          <Typography variant="body" component="div">
-            {block.name}
-          </Typography>
+          {item.name}
         </Box>
       ))}
     </Stack>
   );
+
+  const renderGEBlocks = () => {
+    return (
+      <Stack direction="row" spacing={2}>
+        {deptBlock.map((block, index) => (
+          <Box
+            key={index}
+            sx={{
+              border: "1px solid grey",
+              p: 2,
+              boxShadow: 1,
+              borderRadius: 1,
+              cursor: "pointer",
+              bgcolor: getSelectedBlockIds().includes(block.block_id)
+                ? "green"
+                : "background.paper",
+              color: getSelectedBlockIds().includes(block.block_id)
+                ? "white"
+                : "black",
+            }}
+            onClick={() => handleGEBlockClick(block)}
+          >
+            <Typography
+              sx={{ fontWeight: "bold" }}
+              variant="subtitle2"
+              component="div"
+            >
+              GE
+            </Typography>
+            <Typography variant="body" component="div">
+              {block.name}
+            </Typography>
+          </Box>
+        ))}
+      </Stack>
+    );
+  };
 
   return (
     <Box sx={{ textAlign: "center" }}>
@@ -441,9 +465,8 @@ const CourseSelection = () => {
 
       <Stack sx={{ m: "2rem 2rem", display: "flex", flexDirection: "row" }}>
         <Stack sx={{ flex: "1" }} spacing={2}>
-          <SideTable data={prevCourses} />
           <SideTable data={exCourses} />
-          <SideTable data={exCourses} type="normal" />
+          <SideTable data={prevCourses} />
         </Stack>
         <Stack sx={{ flex: "0.5" }}></Stack>
         <Stack sx={{ flex: "5" }}>
@@ -461,8 +484,9 @@ const CourseSelection = () => {
               currentYear={currentYear}
             />
           </Box>
-          <Stack sx={{ mt: "2rem" }}>
-            {renderBlocks()}
+          <Stack sx={{ mt: "2rem", mb: "2rem" }}>
+            <Box sx={{ mb: "2rem" }}>{renderBlocks()}</Box>
+            {isGEBlockVisible ? renderGEBlocks() : null}
             <Box sx={{ mt: "2rem" }}>
               {isTableVisible ? (
                 <>
