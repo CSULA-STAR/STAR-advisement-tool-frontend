@@ -6,21 +6,16 @@ This project is a React application bootstrapped with Vite. It offers a fast dev
 
 ## Table of Contents
 
-- [Installation](#installation)
-- [Prerequisites](#prerequisites)
-- [Configuration](#configuration)
-- [Scripts](#scripts)
-- [Folder Structure](#folder-structure)
-- [Dependencies](#dependencies)
-- [License](#license)
-
-## Installation
-
-1. Clone the repository:
-   ```sh
-   git clone git@github.com:pcparagc/CSULA_SAT.git
-   cd STAR-advisement-tool-frontend
-   ```
+- [STAR Advisement Tool Frontend](#star-advisement-tool-frontend)
+  - [Table of Contents](#table-of-contents)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Configuration](#configuration)
+  - [Scripts](#scripts)
+  - [Folder Structure](#folder-structure)
+  - [Dependencies](#dependencies)
+  - [Dev Dependencies](#dev-dependencies)
+  - [License](#license)
 
 ## Prerequisites
 
@@ -33,9 +28,9 @@ Before you begin, ensure you have met the following requirements:
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/pcparagc/STAR-advisement-tool-frontend.git
+   git clone https://github.com/csula-star/STAR-advisement-tool-frontend.git
+   
    cd STAR-advisement-tool-frontend
-
    ```
 2. Install the dependencies:
    ```sh
