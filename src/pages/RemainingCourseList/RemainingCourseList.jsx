@@ -73,23 +73,23 @@ export default function RemainingCourseList() {
       );
     });
 
-    if (!allCoursesCommented) {
-      const courseWithoutComment = selectedCourses.find((course) => {
-        const courseToCheck = commentedCoursesWithTerm.find(
-          (commentedCourse) => commentedCourse._id === course._id
-        );
-        return (
-          !courseToCheck ||
-          !courseToCheck.comment ||
-          courseToCheck.comment.trim() === ""
-        );
-      });
-      if (courseWithoutComment) {
-        alert(
-          `Please provide a valid comment for ${courseWithoutComment.course_name}`
-        );
-      }
-    } else {
+    // if (!allCoursesCommented) {
+    //   const courseWithoutComment = selectedCourses.find((course) => {
+    //     const courseToCheck = commentedCoursesWithTerm.find(
+    //       (commentedCourse) => commentedCourse._id === course._id
+    //     );
+    //     return (
+    //       !courseToCheck ||
+    //       !courseToCheck.comment ||
+    //       courseToCheck.comment.trim() === ""
+    //     );
+    //   });
+    //   if (courseWithoutComment) {
+    //     alert(
+    //       `Please provide a valid comment for ${courseWithoutComment.course_name}`
+    //     );
+    //   }
+    // } else {
       const combinedCourseswithTerm = [
         ...prevSelectedArray,
         ...commentedCoursesWithTerm,
@@ -116,7 +116,7 @@ export default function RemainingCourseList() {
           prevCourses: updatedCourses,
         },
       });
-    }
+    // }
   };
 
   useEffect(() => {}, [checkboxResponses]);
