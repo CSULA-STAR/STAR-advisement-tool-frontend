@@ -71,48 +71,36 @@ const columns = [
   },
   {
     accessorKey: "pre_requisite.course_code",
-    header: "Requisites",
+    header: "Pre-requisites",
     Cell: ({ row }) => {
-      return (
-        <>
-          {row.original.pre_requisite.course_code.length ? (
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              <Typography
-                fontWeight="bold"
-                variant="body2"
-                sx={{ marginRight: "5px" }}
-              >
-                PRE:{" "}
+      return row.original.pre_requisite.course_code.length ? (
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {row.original.pre_requisite.course_code.map((code, index) => (
+            <Tooltip key={index} title={code}>
+              <Typography variant="body2">
+                {index > 0 && index < 2 ? ", " : ""}
+                {index < 2 ? code : "."}
               </Typography>
-              {row.original.pre_requisite.course_code.map((code, index) => (
-                <Tooltip key={index} title={code}>
-                  <Typography variant="body2">
-                    {index > 0 && index < 2 ? ", " : ""}
-                    {index < 2 ? code : "."}
-                  </Typography>
-                </Tooltip>
-              ))}
-            </Box>
-          ) : null}
-          {row.original.co_requisite.course_code.length ? (
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              <Typography
-                fontWeight="bold"
-                variant="body2"
-                sx={{ marginRight: "5px" }}
-              >
-                CO:
-              </Typography>
-              {row.original.co_requisite.course_code.map((code, index) => (
-                <Typography variant="body2" key={index}>
-                  {index > 0 ? ", " : ""}
-                  {code}
-                </Typography>
-              ))}
-            </Box>
-          ) : null}
-        </>
-      );
+            </Tooltip>
+          ))}
+        </Box>
+      ) : null;
+    },
+  },
+  {
+    accessorKey: "co_requisite.course_code",
+    header: "Co-requisites",
+    Cell: ({ row }) => {
+      return row.original.co_requisite.course_code.length ? (
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {row.original.co_requisite.course_code.map((code, index) => (
+            <Typography variant="body2" key={index}>
+              {index > 0 ? ", " : ""}
+              {code}
+            </Typography>
+          ))}
+        </Box>
+      ) : null;
     },
   },
   {
@@ -444,6 +432,19 @@ const CourseSelection = () => {
     );
   };
 
+  const handleBackClick = () => {
+    // Load state from localStorage
+    const savedState = localStorage.getItem("remainingCourseListLocationState");
+    if (savedState) {
+      const parsedState = JSON.parse(savedState);
+      navigate("/justify-unselected", {
+        state: parsedState
+      });
+    } else {
+      navigate("/");
+    }
+  };
+
   return (
     <Box sx={{ textAlign: "center" }}>
       <Stack
@@ -461,16 +462,23 @@ const CourseSelection = () => {
           <Button
             variant="contained"
             sx={{ marginRight: "10px" }}
+            onClick={handleBackClick}
+          >
+            Back
+          </Button>
+          <Button
+            variant="contained"
+            sx={{ marginRight: "10px" }}
             onClick={handlePreviousClick}
           >
-            Previous
+            Previous Semester
           </Button>
           <Button
             variant="contained"
             sx={{ marginRight: "10px" }}
             onClick={handleNextClick}
           >
-            Next
+            Next Semester
           </Button>
           <Button variant="contained" onClick={handleFinishClick}>
             Finish
@@ -483,9 +491,21 @@ const CourseSelection = () => {
           <SideTable data={selectedCourses} />
           <SideTable data={prevCourses} />
         </Stack>
-        <Stack sx={{ flex: "0.5" }}></Stack>
+        <Stack sx={{ flex: "0.5" }}>
+
+        </Stack>
         <Stack sx={{ flex: "5" }}>
           <Box sx={{ pb: "1rem" }}>
+            <Typography 
+              variant="h6" 
+              sx={{ 
+                mb: 2,
+                textAlign: 'left',
+                pl: 2
+              }}
+            >
+              Major Courses
+            </Typography>
             <CustomTable
               data={nonGECourses}
               columns={columns}
