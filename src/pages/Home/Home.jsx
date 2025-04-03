@@ -87,6 +87,9 @@ const Home = () => {
     localStorage.removeItem("selectedCourses");
     localStorage.removeItem("courseListCheckboxState");
     localStorage.removeItem("courseListLocationState");
+    localStorage.removeItem("remainingCourseListLocationState");
+    localStorage.removeItem("remainingCourseListCheckboxState");
+    localStorage.removeItem("remainingCourseListCourses");
 
     const fetchColleges = async () => {
       try {
