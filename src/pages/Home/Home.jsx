@@ -83,7 +83,10 @@ const Home = () => {
   };
 
   useEffect(() => {
+    // Reset all localStorage items related to course selection
     localStorage.removeItem("selectedCourses");
+    localStorage.removeItem("courseListCheckboxState");
+    localStorage.removeItem("courseListLocationState");
 
     const fetchColleges = async () => {
       try {

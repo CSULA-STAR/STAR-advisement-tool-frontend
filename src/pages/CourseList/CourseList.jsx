@@ -10,6 +10,7 @@ import { useDispatch } from "react-redux";
 import { reset } from "../../slices/selectedCourseSlice";
 import { addAllCourse } from "../../slices/allCoursesSlice";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 
 const CourseList = () => {
   const navigate = useNavigate();
@@ -24,6 +25,20 @@ const CourseList = () => {
   useEffect(() => {
     dispatch(reset());
   }, [dispatch]);
+
+  useEffect(() => {
+    // Load saved location state from localStorage if it exists
+    const savedLocationState = localStorage.getItem("courseListLocationState");
+    if (savedLocationState) {
+      const parsedState = JSON.parse(savedLocationState);
+      // Only use saved state if current state is missing
+      if (!program && !college) {
+        // We can't directly modify location.state, but we can use the saved state
+        // for rendering purposes if needed
+        console.log("Loaded saved location state:", parsedState);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (program && college) {
@@ -52,11 +67,18 @@ const CourseList = () => {
           dispatch(addAllCourse(filteredCourses));
           setMatchedCourses(matched);
 
-          const initialCheckboxResponses = {};
-          matched.forEach(({ csulaCourse }) => {
-            initialCheckboxResponses[csulaCourse._id] = false;
-          });
-          setCheckboxResponses(initialCheckboxResponses);
+          // Load saved checkbox state from localStorage if it exists
+          const savedCheckboxState = localStorage.getItem("courseListCheckboxState");
+          if (savedCheckboxState) {
+            setCheckboxResponses(JSON.parse(savedCheckboxState));
+          } else {
+            // Initialize checkbox state if no saved state exists
+            const initialCheckboxResponses = {};
+            matched.forEach(({ csulaCourse }) => {
+              initialCheckboxResponses[csulaCourse._id] = false;
+            });
+            setCheckboxResponses(initialCheckboxResponses);
+          }
         } catch (error) {
           console.error("Error fetching courses:", error);
         }
@@ -107,6 +129,17 @@ const CourseList = () => {
       .filter(({ csulaCourse }) => !checkboxResponses[csulaCourse._id])
       .map(({ csulaCourse }) => csulaCourse);
 
+    // Save checkbox state to localStorage
+    localStorage.setItem("courseListCheckboxState", JSON.stringify(checkboxResponses));
+    
+    // Save location state to localStorage
+    localStorage.setItem("courseListLocationState", JSON.stringify({
+      program,
+      college,
+      startTerm,
+      startYear
+    }));
+    
     localStorage.setItem(
       "selectedCourses",
       JSON.stringify(selectedCoursesWithTerm)
@@ -306,6 +339,16 @@ const CourseList = () => {
         ) : null;
       })}
       <div className="floating-button">
+        <Button
+          variant="contained"
+          onClick={() => navigate("/")}
+          style={{ backgroundColor: "#FFCE00", borderRadius: 7, marginRight: "10px" }}
+        >
+          <NavigateBeforeIcon />
+          <Typography variant="p" px={5} textTransform="none" fontSize={16}>
+            Back
+          </Typography>
+        </Button>
         <Button
           variant="contained"
           onClick={goToUnselectedCoursesPage}
