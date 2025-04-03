@@ -211,7 +211,7 @@ const CourseList = () => {
                                 hoverable={false}
                                 course={selectedCourse}
                                 isChecked={checkboxResponses[csulaCourse._id]}
-                                onCheckboxChange={(isChecked) =>
+                                onCheckboxChange={(courseId, isChecked) =>
                                   handleCheckboxChange(
                                     csulaCourse._id,
                                     isChecked
@@ -260,7 +260,7 @@ const CourseList = () => {
                             hoverable={false}
                             course={selectedCourse}
                             isChecked={checkboxResponses[csulaCourse._id]}
-                            onCheckboxChange={(isChecked) =>
+                            onCheckboxChange={(courseId, isChecked) =>
                               handleCheckboxChange(csulaCourse._id, isChecked)
                             }
                           />
