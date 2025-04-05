@@ -11,6 +11,8 @@ const TableComp = ({ data }) => {
             <th>Credits</th>
             <th>Taken Semester</th>
             <th>Year</th>
+            <th>Pre-requisites</th>
+            <th>Co-requisites</th>
           </tr>
         </thead>
         <tbody>
@@ -31,6 +33,8 @@ const TableComp = ({ data }) => {
               <td>{row.credits}</td>
               <td>{row?.selected_term?.term || ""}</td>
               <td>{row?.selected_term?.year || ""}</td>
+              <td>{row.pre_requisite?.course_code?.join(", ") || ""}</td>
+              <td>{row.co_requisite?.course_code?.join(", ") || ""}</td>
             </tr>
           ))}
         </tbody>
