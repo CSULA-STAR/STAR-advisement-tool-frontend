@@ -24,6 +24,9 @@ import CustomTable from "./CustomTable";
 import SideTable from "./SideTable";
 import NewTabTable from "./NewTabTable";
 
+// Key for localStorage GE Categories
+const GE_LOCAL_STORAGE_KEY = 'selectedGECategories';
+
 const columns = [
   {
     accessorKey: "course_code",
@@ -153,8 +156,25 @@ const CourseSelection = () => {
   const [currTableData, setCurrTableData] = useState([]);
   const [nonGECourses, setNonGECourses] = useState([]);
   const [isGEBlockVisible, setIsGEBlockVisible] = useState(false);
+  const [selectedGECategoryIds, setSelectedGECategoryIds] = useState([]); // State for selected GE category IDs
 
   const [navigationHistory, setNavigationHistory] = useState([]);
+
+  // Effect to load selected GE categories from localStorage
+  useEffect(() => {
+    const savedCategories = localStorage.getItem(GE_LOCAL_STORAGE_KEY);
+    if (savedCategories) {
+      try {
+        const parsedIds = JSON.parse(savedCategories);
+        setSelectedGECategoryIds(parsedIds);
+      } catch (error) {
+        console.error("Error parsing saved GE category IDs:", error);
+        setSelectedGECategoryIds([]); // Fallback to empty array on error
+      }
+    } else {
+      setSelectedGECategoryIds([]); // Set empty if nothing in localStorage
+    }
+  }, []); // Run only once on mount
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -406,10 +426,10 @@ const CourseSelection = () => {
                 boxShadow: 1,
                 borderRadius: 1,
                 cursor: "pointer",
-                bgcolor: getSelectedBlockIds().includes(block.block_id)
+                bgcolor: selectedGECategoryIds.includes(block.block_id)
                   ? "green"
                   : "background.paper",
-                color: getSelectedBlockIds().includes(block.block_id)
+                color: selectedGECategoryIds.includes(block.block_id)
                   ? "white"
                   : "black",
               }}
