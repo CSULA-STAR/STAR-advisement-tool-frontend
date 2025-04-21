@@ -8,8 +8,7 @@ import { getNextYears } from "../../utils";
 import "./HomeStyle.css";
 import { Typography } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import { InputLabel } from "@mui/material";
-import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { createTheme } from '@mui/material/styles';
 
 
 
@@ -72,7 +71,7 @@ const Home = () => {
       return;
     }
 
-    navigate("/courselist", {
+    navigate("/gecourselist", {
       state: {
         program: selectedProgram,
         college: college,
@@ -90,6 +89,7 @@ const Home = () => {
     localStorage.removeItem("remainingCourseListLocationState");
     localStorage.removeItem("remainingCourseListCheckboxState");
     localStorage.removeItem("remainingCourseListCourses");
+    localStorage.removeItem("selectedGECategories");
 
     const fetchColleges = async () => {
       try {

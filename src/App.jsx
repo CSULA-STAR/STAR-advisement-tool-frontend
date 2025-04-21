@@ -6,6 +6,7 @@ import CourseList from "./pages/CourseList/CourseList";
 import CourseSelection from "./pages/CourseSelection/CourseSelection.jsx";
 import Home from "./pages/Home/Home";
 import SelectedCourses from "./pages/SelectedCourses/SelectedCourses";
+import GECourseList from "./pages/GECourseList/GECourseList";
 import store from "./store";
 
 const App = () => {
@@ -16,6 +17,7 @@ const App = () => {
         <main className="main-content">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/gecourselist" element={<GECourseList />} />
             <Route path="/courselist" element={<CourseList />} />
             <Route path="/selected-courses" element={<SelectedCourses />} />
             <Route path="/course-selection" element={<CourseSelection />} />

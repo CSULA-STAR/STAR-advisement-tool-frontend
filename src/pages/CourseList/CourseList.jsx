@@ -140,10 +140,7 @@ const CourseList = () => {
       startYear
     }));
     
-    localStorage.setItem(
-      "selectedCourses",
-      JSON.stringify(selectedCoursesWithTerm)
-    );
+    localStorage.setItem("selectedCourses", JSON.stringify(selectedCoursesWithTerm));
 
     navigate("/justify-unselected", {
       state: {
@@ -155,6 +152,14 @@ const CourseList = () => {
         csulaCourseList,
       },
     });
+  };
+
+  const backtoGECoursesPage = () => {
+    // Save checkbox state to localStorage
+    localStorage.setItem("courseListCheckboxState", JSON.stringify(checkboxResponses));
+
+    // Navigate back to GECourseList, preserving state
+    navigate("/gecourselist", { state: location.state });
   };
 
   if (!program || !college) {
@@ -196,41 +201,6 @@ const CourseList = () => {
             </div>
             <Box className="course-group">
               <Box>
-                <div
-                  className="row"
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    textAlign: "center",
-                    margin: "30px 0",
-                  }}
-                >
-                  <div className="column">
-                    {!selectedSchoolHeadingRendered && (
-                      <Typography
-                        variant="h6"
-                        display="inline-block"
-                        fontWeight="bold"
-                        pl={10}
-                      >
-                        {college?.name}
-                      </Typography>
-                    )}
-                  </div>
-                  <div className="columnCalstate column">
-                    {!csulaHeadingRendered && (
-                      <Typography
-                        variant="h6"
-                        display="inline-block"
-                        fontWeight="bold"
-                        pr={12}
-                      >
-                        California State University
-                      </Typography>
-                    )}
-                  </div>
-                </div>
                 {matchedForThisType.map(({ csulaCourse, selectedCourse }) => (
                   <Box className="course-row" key={csulaCourse._id}>
                     {csulaCourse.course_type === "general_education" ? (
@@ -341,7 +311,7 @@ const CourseList = () => {
       <div className="floating-button">
         <Button
           variant="contained"
-          onClick={() => navigate("/")}
+          onClick={backtoGECoursesPage}
           style={{ backgroundColor: "#FFCE00", borderRadius: 7, marginRight: "10px" }}
         >
           <NavigateBeforeIcon />
