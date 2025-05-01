@@ -7,6 +7,8 @@ import CourseSelection from "./pages/CourseSelection/CourseSelection.jsx";
 import Home from "./pages/Home/Home";
 import SelectedCourses from "./pages/SelectedCourses/SelectedCourses";
 import GECourseList from "./pages/GECourseList/GECourseList";
+import HomeMapping from "./pages/Map/HomeMapping";
+import Map from "./pages/Map/Map";
 import store from "./store";
 
 const App = () => {
@@ -21,6 +23,8 @@ const App = () => {
             <Route path="/courselist" element={<CourseList />} />
             <Route path="/selected-courses" element={<SelectedCourses />} />
             <Route path="/course-selection" element={<CourseSelection />} />
+            <Route path="/mapping" element={<HomeMapping />} />
+            <Route path="/map" element={<Map />} />
             <Route
               path="/justify-unselected"
               element={<RemainingCourseList />}

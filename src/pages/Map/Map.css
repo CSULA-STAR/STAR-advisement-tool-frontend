@@ -1,0 +1,18 @@
+.MuiTableContainer-root {
+  margin-top: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.MuiTableCell-head {
+  background-color: #f5f5f5;
+  font-weight: bold !important;
+}
+
+.MuiTableRow-root:hover {
+  background-color: #f8f8f8;
+}
+
+.MuiTableCell-root {
+  padding: 16px;
+  border-bottom: 1px solid #e0e0e0;
+} 
