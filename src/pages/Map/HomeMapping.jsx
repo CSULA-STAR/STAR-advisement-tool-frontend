@@ -1,10 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import SelectionDropdown from "../../components/SelectionDropdown";
-import { useNavigate } from "react-router-dom";
-import { Box, Stack, Button } from "@mui/material";
-import { Typography } from "@mui/material";
-import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import { Box, Stack, Button, Typography } from "@mui/material";
 import { createTheme } from '@mui/material/styles';
 import "./Map.css";
 
@@ -32,8 +29,6 @@ const HomeMapping = () => {
     },
   });
 
-  const navigate = useNavigate();
-
   const handleChange = (event) => {
     setCollege(event.value);
     setSelectedProgram("");
@@ -48,8 +43,8 @@ const HomeMapping = () => {
       alert("Please select both school and program before submitting.");
       return;
     }
-
-    navigate(`/map?s_id=${college.id}&dept=${selectedProgram.id}`);
+    const url = `/map?s_id=${college.id}&dept=${selectedProgram.department}`;
+    window.open(url, '_blank');
   };
 
   useEffect(() => {
@@ -146,7 +141,7 @@ const HomeMapping = () => {
             variant="contained"
             style={{
               backgroundColor: "#FFCE00",
-
+              paddingRight: 5,
             }}
           >
             Show Mapping
