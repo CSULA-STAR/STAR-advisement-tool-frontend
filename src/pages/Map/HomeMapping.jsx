@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import SelectionDropdown from "../../components/SelectionDropdown";
 import { Box, Stack, Button, Typography } from "@mui/material";
 import { createTheme } from '@mui/material/styles';
-import "./Map.css";
 
 const HomeMapping = () => { 
   const [college, setCollege] = useState("");
@@ -141,7 +140,6 @@ const HomeMapping = () => {
             variant="contained"
             style={{
               backgroundColor: "#FFCE00",
-              paddingRight: 5,
             }}
           >
             Show Mapping

@@ -1,21 +1,21 @@
-.main-content {
+.map-content {
   margin-top: 0px !important;
 }
 
 .calstatela-cell {
-  background: #fff9e1 !important;
+  background: #fff9e1;
   width: 35%;
 }
 
 .transferschool-cell {
-  background: #eaf3ff !important;
+  background: #eaf3ff;
   width: 35%;
 }
 
 .arrow-cell {
   width: 10%;
   text-align: center;
-  vertical-align: middle !important;
+  vertical-align: middle;
   font-size: 48px !important;
   color: #1d006d !important;
 }
@@ -56,15 +56,15 @@
 }
 
 .MuiTableRow-root:hover {
-  border: 2px solid #555 !important;
+  border: 2px solid #555;
 }
 
 .MuiTableRow-head {
-  background: #222 !important;
-  pointer-events: none !important;
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 10 !important;
+  background: #222;
+  pointer-events: none;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .MuiTableCell-head {
